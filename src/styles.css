@@ -562,9 +562,31 @@ textarea {
   font-weight: 800;
 }
 
+.product-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .product-row small {
   color: var(--success);
   font-weight: 700;
+}
+
+.product-edit-form {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.product-edit-form .field {
+  gap: 4px;
+}
+
+.product-edit-form input {
+  min-height: 38px;
 }
 
 .party-layout {
@@ -606,6 +628,7 @@ textarea {
   .two-column,
   .compact-form-row-main,
   .compact-form-row-money,
+  .product-edit-form,
   .party-layout,
   .filters {
     grid-template-columns: 1fr;
@@ -630,5 +653,10 @@ textarea {
 
   .filters {
     align-items: stretch;
+  }
+
+  .product-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 }

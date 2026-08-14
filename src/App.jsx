@@ -274,6 +274,21 @@ export default function App() {
     }
   }
 
+  async function renameProduct(productId, nextName) {
+    setLoading(true);
+    setError("");
+
+    try {
+      await api(`/products/${productId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ name: nextName })
+      });
+      await Promise.all([loadProducts(), loadCurrentStock(), loadHistory(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function submitParty(event) {
     event.preventDefault();
     setLoading(true);
@@ -514,6 +529,7 @@ export default function App() {
             name={productName}
             setName={setProductName}
             onSubmit={submitProduct}
+            onRename={renameProduct}
             loading={loading}
             productSubmitStatus={productSubmitStatus}
             submitError={submitErrors.product}
