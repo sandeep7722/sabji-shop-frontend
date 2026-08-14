@@ -263,6 +263,10 @@ textarea {
   gap: 14px;
 }
 
+.metric-grid.four-metrics {
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+}
+
 .metric,
 .form-grid,
 .product-list,

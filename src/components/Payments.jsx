@@ -3,7 +3,7 @@ import { Save } from "lucide-react";
 import { formatDate, formatMoney } from "../utils/format.js";
 import { InputField, SelectField } from "./FormFields.jsx";
 
-export function Payments({ parties, payments, filters, setFilters, paymentForm, setPaymentForm, onCreatePayment, onSearchPayments, loading }) {
+export function Payments({ parties, payments, summary, filters, setFilters, paymentForm, setPaymentForm, onCreatePayment, onSearchPayments, loading }) {
   function setPaymentField(field, value) {
     setPaymentForm((current) => ({ ...current, [field]: value }));
   }
@@ -14,6 +14,25 @@ export function Payments({ parties, payments, filters, setFilters, paymentForm, 
 
   return (
     <section className="content-section">
+      <div className="metric-grid four-metrics">
+        <div className="metric">
+          <span>Total Buy</span>
+          <strong>{formatMoney(summary.purchaseAmount)}</strong>
+        </div>
+        <div className="metric">
+          <span>Total Sell</span>
+          <strong>{formatMoney(summary.saleAmount)}</strong>
+        </div>
+        <div className="metric">
+          <span>Total Payable</span>
+          <strong className="negative">{formatMoney(summary.payableAmount)}</strong>
+        </div>
+        <div className="metric">
+          <span>Total Receivable</span>
+          <strong className="positive">{formatMoney(summary.receivableAmount)}</strong>
+        </div>
+      </div>
+
       <div className="party-layout">
         <form className="form-grid" onSubmit={onCreatePayment}>
           <h3>Add Payment</h3>

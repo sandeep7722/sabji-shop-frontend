@@ -43,6 +43,14 @@ export default function App() {
   const [currentStock, setCurrentStock] = useState([]);
   const [history, setHistory] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [paymentSummary, setPaymentSummary] = useState({
+    purchaseAmount: 0,
+    saleAmount: 0,
+    paidAmount: 0,
+    receivedAmount: 0,
+    receivableAmount: 0,
+    payableAmount: 0
+  });
   const [partyDetails, setPartyDetails] = useState(null);
   const [selectedPartyId, setSelectedPartyId] = useState("");
   const [loading, setLoading] = useState(false);
@@ -127,11 +135,16 @@ export default function App() {
     setPayments(data);
   }
 
+  async function loadPaymentSummary() {
+    const data = await api("/payments/summary");
+    setPaymentSummary(data);
+  }
+
   async function refreshAll() {
     setLoading(true);
     setError("");
     try {
-      await Promise.all([loadProducts(), loadParties(), loadCurrentStock(), loadHistory(), loadPayments()]);
+      await Promise.all([loadProducts(), loadParties(), loadCurrentStock(), loadHistory(), loadPayments(), loadPaymentSummary()]);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -166,7 +179,7 @@ export default function App() {
       setNotice(kind === "in" ? "Stock added successfully." : "Stock removed successfully.");
       if (kind === "in") setStockInForm(emptyMovementForm);
       if (kind === "out") setStockOutForm(emptyMovementForm);
-      await Promise.all([loadCurrentStock(), loadHistory(), loadPayments(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+      await Promise.all([loadCurrentStock(), loadHistory(), loadPayments(), loadPaymentSummary(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
       setActiveTab("current");
     } catch (requestError) {
       setError(formatApiError(requestError));
@@ -290,7 +303,7 @@ export default function App() {
         note: ""
       });
       setNotice("Payment saved.");
-      await Promise.all([loadPayments(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+      await Promise.all([loadPayments(), loadPaymentSummary(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -391,6 +404,7 @@ export default function App() {
           <Payments
             parties={parties}
             payments={payments}
+            summary={paymentSummary}
             filters={paymentFilters}
             setFilters={setPaymentFilters}
             paymentForm={paymentForm}
