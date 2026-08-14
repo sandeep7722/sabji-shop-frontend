@@ -21,9 +21,11 @@ export const tabs = [
   { id: "products", label: "Products", icon: PackagePlus }
 ];
 
-export function Sidebar({ activeTab, onChange }) {
+export function Sidebar({ activeTab, isOpen, onChange, onClose }) {
   return (
-    <aside className="sidebar">
+    <>
+      <div className={isOpen ? "menu-backdrop visible" : "menu-backdrop"} onClick={onClose} />
+      <aside className={isOpen ? "sidebar open" : "sidebar"}>
       <div className="brand">
         <div className="brand-mark">PO</div>
         <div>
@@ -40,7 +42,10 @@ export function Sidebar({ activeTab, onChange }) {
               key={tab.id}
               className={activeTab === tab.id ? "nav-item active" : "nav-item"}
               type="button"
-              onClick={() => onChange(tab.id)}
+              onClick={() => {
+                onChange(tab.id);
+                onClose();
+              }}
             >
               <Icon size={18} />
               <span>{tab.label}</span>
@@ -48,6 +53,7 @@ export function Sidebar({ activeTab, onChange }) {
           );
         })}
       </nav>
-    </aside>
+      </aside>
+    </>
   );
 }

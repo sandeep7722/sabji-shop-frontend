@@ -37,6 +37,7 @@ const emptyAdjustmentForm = {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("current");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const [parties, setParties] = useState([]);
   const [currentStock, setCurrentStock] = useState([]);
@@ -326,9 +327,9 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar activeTab={activeTab} onChange={setActiveTab} />
+      <Sidebar activeTab={activeTab} isOpen={isMenuOpen} onChange={setActiveTab} onClose={() => setIsMenuOpen(false)} />
       <main className="main">
-        <Topbar activeTab={activeTab} loading={loading} onRefresh={refreshAll} />
+        <Topbar activeTab={activeTab} loading={loading} onRefresh={refreshAll} onMenuClick={() => setIsMenuOpen(true)} onTabChange={setActiveTab} />
         <Alerts error={error} notice={notice} />
 
         {activeTab === "current" && <CurrentStock stock={currentStock} loading={loading} />}
