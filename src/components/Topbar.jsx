@@ -4,8 +4,8 @@ import { tabs } from "./Sidebar.jsx";
 
 const quickActions = [
   { id: "current", label: "Home", icon: Boxes },
-  { id: "in", label: "Add", icon: ArrowDownToLine },
-  { id: "out", label: "Remove", icon: ArrowUpFromLine },
+  { id: "in", label: "Buy", icon: ArrowDownToLine },
+  { id: "out", label: "Sell", icon: ArrowUpFromLine },
   { id: "history", label: "History", icon: ClipboardList },
   { id: "payments", label: "Payments", icon: ReceiptIndianRupee },
   { id: "parties", label: "Parties", icon: Users }
