@@ -1,9 +1,22 @@
 import React from "react";
-import { Save } from "lucide-react";
 import { formatDate, formatMoney } from "../utils/format.js";
 import { InputField, SelectField } from "./FormFields.jsx";
+import { SubmitButton } from "./SubmitButton.jsx";
 
-export function Payments({ parties, payments, summary, filters, setFilters, paymentForm, setPaymentForm, onCreatePayment, onSearchPayments, loading }) {
+export function Payments({
+  parties,
+  payments,
+  summary,
+  filters,
+  setFilters,
+  paymentForm,
+  setPaymentForm,
+  onCreatePayment,
+  onSearchPayments,
+  loading,
+  paymentSubmitStatus = "idle",
+  submitError = ""
+}) {
   function setPaymentField(field, value) {
     setPaymentForm((current) => ({ ...current, [field]: value }));
   }
@@ -65,10 +78,7 @@ export function Payments({ parties, payments, summary, filters, setFilters, paym
             <span>Note</span>
             <textarea value={paymentForm.note} placeholder="Advance / old balance / partial payment" onChange={(event) => setPaymentField("note", event.target.value)} />
           </label>
-          <button className="primary-button" type="submit" disabled={loading}>
-            <Save size={17} />
-            <span>Save Payment</span>
-          </button>
+          <SubmitButton status={paymentSubmitStatus} idleLabel="Save Payment" disabled={loading && paymentSubmitStatus !== "saving"} errorText={submitError} />
         </form>
 
         <form className="form-grid" onSubmit={onSearchPayments}>

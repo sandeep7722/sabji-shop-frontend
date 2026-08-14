@@ -1,8 +1,8 @@
 import React from "react";
-import { Save } from "lucide-react";
 import { InputField, SelectField } from "./FormFields.jsx";
+import { SubmitButton } from "./SubmitButton.jsx";
 
-export function AdjustmentForm({ form, setForm, productOptions, onSubmit, loading }) {
+export function AdjustmentForm({ form, setForm, productOptions, onSubmit, loading, adjustmentSubmitStatus = "idle", submitError = "" }) {
   function setField(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
   }
@@ -39,10 +39,7 @@ export function AdjustmentForm({ form, setForm, productOptions, onSubmit, loadin
           <span>Note</span>
           <textarea value={form.note} placeholder="Rotten onions" onChange={(event) => setField("note", event.target.value)} />
         </label>
-        <button className="primary-button" type="submit" disabled={loading}>
-          <Save size={17} />
-          <span>Save Adjustment</span>
-        </button>
+        <SubmitButton status={adjustmentSubmitStatus} idleLabel="Save Adjustment" disabled={loading && adjustmentSubmitStatus !== "saving"} errorText={submitError} />
       </form>
     </section>
   );

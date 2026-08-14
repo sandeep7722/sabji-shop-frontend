@@ -1,7 +1,8 @@
 import React from "react";
-import { Plus, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { balanceLabel, formatDate, formatMoney, signedClass } from "../utils/format.js";
 import { InputField, SelectField } from "./FormFields.jsx";
+import { SubmitButton } from "./SubmitButton.jsx";
 
 export function Parties({
   parties,
@@ -12,7 +13,9 @@ export function Parties({
   setPartyForm,
   onCreateParty,
   onLoadPartyDetails,
-  loading
+  loading,
+  partySubmitStatus = "idle",
+  submitError = ""
 }) {
   function setField(field, value) {
     setPartyForm((current) => ({ ...current, [field]: value }));
@@ -37,10 +40,7 @@ export function Parties({
             <span>Address</span>
             <textarea value={partyForm.address} placeholder="Market road" onChange={(event) => setField("address", event.target.value)} />
           </label>
-          <button className="primary-button" type="submit" disabled={loading}>
-            <Plus size={17} />
-            <span>Add Party</span>
-          </button>
+          <SubmitButton status={partySubmitStatus} idleLabel="Add Party" disabled={loading && partySubmitStatus !== "saving"} errorText={submitError} />
         </form>
 
         <div className="form-grid">

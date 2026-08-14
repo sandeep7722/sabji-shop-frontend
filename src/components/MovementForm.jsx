@@ -1,6 +1,6 @@
 import React from "react";
-import { Save } from "lucide-react";
 import { InputField, SelectField } from "./FormFields.jsx";
+import { SubmitButton } from "./SubmitButton.jsx";
 
 export function MovementForm({
   title,
@@ -14,6 +14,8 @@ export function MovementForm({
   paymentLabel,
   notePlaceholder,
   loading,
+  submitStatus = "idle",
+  submitError = "",
   compact = false
 }) {
   function setField(field, value) {
@@ -92,10 +94,7 @@ export function MovementForm({
             <textarea value={form.note} placeholder={notePlaceholder} onChange={(event) => setField("note", event.target.value)} />
           </label>
         )}
-        <button className="primary-button" type="submit" disabled={loading}>
-          <Save size={17} />
-          <span>{submitLabel}</span>
-        </button>
+        <SubmitButton status={submitStatus} idleLabel={submitLabel} disabled={loading && submitStatus !== "saving"} errorText={submitError} />
       </form>
     </section>
   );

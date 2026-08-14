@@ -35,6 +35,18 @@ const emptyAdjustmentForm = {
   note: ""
 };
 
+function resetSubmitStatus(setter, delay = 1400) {
+  window.setTimeout(() => setter("idle"), delay);
+}
+
+function clearSubmitError(setter, key) {
+  setter((current) => ({ ...current, [key]: "" }));
+}
+
+function setSubmitError(setter, key, message) {
+  setter((current) => ({ ...current, [key]: message }));
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState("current");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -56,9 +68,23 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const [submitErrors, setSubmitErrors] = useState({
+    stockIn: "",
+    stockOut: "",
+    adjustment: "",
+    payment: "",
+    party: "",
+    product: ""
+  });
   const [stockInForm, setStockInForm] = useState(emptyMovementForm);
   const [stockOutForm, setStockOutForm] = useState(emptyMovementForm);
   const [adjustmentForm, setAdjustmentForm] = useState(emptyAdjustmentForm);
+  const [stockInSubmitStatus, setStockInSubmitStatus] = useState("idle");
+  const [stockOutSubmitStatus, setStockOutSubmitStatus] = useState("idle");
+  const [adjustmentSubmitStatus, setAdjustmentSubmitStatus] = useState("idle");
+  const [paymentSubmitStatus, setPaymentSubmitStatus] = useState("idle");
+  const [partySubmitStatus, setPartySubmitStatus] = useState("idle");
+  const [productSubmitStatus, setProductSubmitStatus] = useState("idle");
   const [productName, setProductName] = useState("");
   const [paymentForm, setPaymentForm] = useState({
     partyId: "",
@@ -163,6 +189,10 @@ export default function App() {
     setNotice("");
 
     const form = kind === "in" ? stockInForm : stockOutForm;
+    const setSubmitStatus = kind === "in" ? setStockInSubmitStatus : setStockOutSubmitStatus;
+    const submitErrorKey = kind === "in" ? "stockIn" : "stockOut";
+    clearSubmitError(setSubmitErrors, submitErrorKey);
+    setSubmitStatus("saving");
 
     try {
       await api(`/stock/${kind}`, {
@@ -176,12 +206,14 @@ export default function App() {
           paymentMode: form.paymentMode
         })
       });
-      setNotice(kind === "in" ? "Stock added successfully." : "Stock removed successfully.");
       if (kind === "in") setStockInForm(emptyMovementForm);
       if (kind === "out") setStockOutForm(emptyMovementForm);
       await Promise.all([loadCurrentStock(), loadHistory(), loadPayments(), loadPaymentSummary(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+      setSubmitStatus("saved");
+      resetSubmitStatus(setSubmitStatus);
     } catch (requestError) {
-      setError(formatApiError(requestError));
+      setSubmitStatus("idle");
+      setSubmitError(setSubmitErrors, submitErrorKey, formatApiError(requestError));
     } finally {
       setLoading(false);
     }
@@ -192,6 +224,8 @@ export default function App() {
     setLoading(true);
     setError("");
     setNotice("");
+    clearSubmitError(setSubmitErrors, "adjustment");
+    setAdjustmentSubmitStatus("saving");
 
     try {
       await api("/stock/adjustment", {
@@ -202,12 +236,14 @@ export default function App() {
           weight: Number(adjustmentForm.weight)
         })
       });
-      setNotice("Stock adjustment saved.");
       setAdjustmentForm(emptyAdjustmentForm);
       await Promise.all([loadCurrentStock(), loadHistory()]);
       setActiveTab("current");
+      setAdjustmentSubmitStatus("saved");
+      resetSubmitStatus(setAdjustmentSubmitStatus);
     } catch (requestError) {
-      setError(formatApiError(requestError));
+      setAdjustmentSubmitStatus("idle");
+      setSubmitError(setSubmitErrors, "adjustment", formatApiError(requestError));
     } finally {
       setLoading(false);
     }
@@ -218,6 +254,8 @@ export default function App() {
     setLoading(true);
     setError("");
     setNotice("");
+    clearSubmitError(setSubmitErrors, "product");
+    setProductSubmitStatus("saving");
 
     try {
       await api("/products", {
@@ -225,10 +263,12 @@ export default function App() {
         body: JSON.stringify({ name: productName })
       });
       setProductName("");
-      setNotice("Product created.");
       await Promise.all([loadProducts(), loadCurrentStock()]);
+      setProductSubmitStatus("saved");
+      resetSubmitStatus(setProductSubmitStatus);
     } catch (requestError) {
-      setError(requestError.message);
+      setProductSubmitStatus("idle");
+      setSubmitError(setSubmitErrors, "product", requestError.message);
     } finally {
       setLoading(false);
     }
@@ -239,6 +279,8 @@ export default function App() {
     setLoading(true);
     setError("");
     setNotice("");
+    clearSubmitError(setSubmitErrors, "party");
+    setPartySubmitStatus("saving");
 
     try {
       await api("/parties", {
@@ -253,10 +295,12 @@ export default function App() {
         address: "",
         note: ""
       });
-      setNotice("Party created.");
       await loadParties();
+      setPartySubmitStatus("saved");
+      resetSubmitStatus(setPartySubmitStatus);
     } catch (requestError) {
-      setError(requestError.message);
+      setPartySubmitStatus("idle");
+      setSubmitError(setSubmitErrors, "party", requestError.message);
     } finally {
       setLoading(false);
     }
@@ -284,6 +328,8 @@ export default function App() {
     setLoading(true);
     setError("");
     setNotice("");
+    clearSubmitError(setSubmitErrors, "payment");
+    setPaymentSubmitStatus("saving");
 
     try {
       await api("/payments", {
@@ -301,10 +347,12 @@ export default function App() {
         mode: "Cash",
         note: ""
       });
-      setNotice("Payment saved.");
       await Promise.all([loadPayments(), loadPaymentSummary(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+      setPaymentSubmitStatus("saved");
+      resetSubmitStatus(setPaymentSubmitStatus);
     } catch (requestError) {
-      setError(requestError.message);
+      setPaymentSubmitStatus("idle");
+      setSubmitError(setSubmitErrors, "payment", requestError.message);
     } finally {
       setLoading(false);
     }
@@ -359,6 +407,8 @@ export default function App() {
               paymentLabel="Paid Now"
               notePlaceholder="Fresh onion stock"
               loading={loading}
+              submitStatus={stockInSubmitStatus}
+              submitError={submitErrors.stockIn}
               compact
             />
             <History
@@ -388,6 +438,8 @@ export default function App() {
               paymentLabel="Received Now"
               notePlaceholder="Wholesale"
               loading={loading}
+              submitStatus={stockOutSubmitStatus}
+              submitError={submitErrors.stockOut}
               compact
             />
             <History
@@ -412,6 +464,7 @@ export default function App() {
             setFilters={setHistoryFilters}
             onSubmit={submitHistoryFilters}
             loading={loading}
+            partySubmitStatus={partySubmitStatus}
           />
         )}
         {activeTab === "parties" && (
@@ -425,6 +478,7 @@ export default function App() {
             onCreateParty={submitParty}
             onLoadPartyDetails={loadPartyDetails}
             loading={loading}
+            submitError={submitErrors.party}
           />
         )}
         {activeTab === "payments" && (
@@ -439,12 +493,32 @@ export default function App() {
             onCreatePayment={submitPayment}
             onSearchPayments={submitPaymentFilters}
             loading={loading}
+            paymentSubmitStatus={paymentSubmitStatus}
+            submitError={submitErrors.payment}
           />
         )}
         {activeTab === "adjustment" && (
-          <AdjustmentForm form={adjustmentForm} setForm={setAdjustmentForm} productOptions={productOptions} onSubmit={submitAdjustment} loading={loading} />
+          <AdjustmentForm
+            form={adjustmentForm}
+            setForm={setAdjustmentForm}
+            productOptions={productOptions}
+            onSubmit={submitAdjustment}
+            loading={loading}
+            adjustmentSubmitStatus={adjustmentSubmitStatus}
+            submitError={submitErrors.adjustment}
+          />
         )}
-        {activeTab === "products" && <Products products={products} name={productName} setName={setProductName} onSubmit={submitProduct} loading={loading} />}
+        {activeTab === "products" && (
+          <Products
+            products={products}
+            name={productName}
+            setName={setProductName}
+            onSubmit={submitProduct}
+            loading={loading}
+            productSubmitStatus={productSubmitStatus}
+            submitError={submitErrors.product}
+          />
+        )}
       </main>
     </div>
   );

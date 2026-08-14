@@ -220,6 +220,48 @@ textarea {
   background: var(--primary-dark);
 }
 
+.submit-button {
+  min-width: 132px;
+}
+
+.submit-button.saved {
+  background: var(--success);
+}
+
+.submit-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.submit-error {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  max-width: min(640px, 100%);
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.submit-error span {
+  overflow-wrap: anywhere;
+}
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .primary-button:disabled,
 .icon-button:disabled {
   opacity: 0.65;
