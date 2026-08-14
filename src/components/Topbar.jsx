@@ -1,9 +1,10 @@
 import React from "react";
-import { ArrowDownToLine, ArrowUpFromLine, Boxes, ClipboardList, Menu, RefreshCw, ReceiptIndianRupee, Users } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, BarChart3, Boxes, ClipboardList, Menu, RefreshCw, ReceiptIndianRupee, Users } from "lucide-react";
 import { tabs } from "./Sidebar.jsx";
 
 const quickActions = [
   { id: "current", label: "Home", icon: Boxes },
+  { id: "summary", label: "Summary", icon: BarChart3 },
   { id: "in", label: "Buy", icon: ArrowDownToLine },
   { id: "out", label: "Sell", icon: ArrowUpFromLine },
   { id: "history", label: "History", icon: ClipboardList },

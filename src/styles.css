@@ -309,6 +309,10 @@ textarea {
   grid-template-columns: repeat(4, minmax(170px, 1fr));
 }
 
+.metric-grid.summary-grid {
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+}
+
 .metric,
 .form-grid,
 .product-list,
@@ -477,6 +481,18 @@ textarea {
 .filters {
   display: grid;
   grid-template-columns: 1.1fr 1.1fr 1fr 1fr 1fr auto;
+  align-items: end;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+
+.summary-filter-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.2fr) minmax(150px, 0.7fr) minmax(150px, 0.7fr) auto auto;
   align-items: end;
   gap: 12px;
   background: var(--panel);
@@ -704,6 +720,7 @@ textarea {
 
   .topbar,
   .metric-grid,
+  .summary-filter-form,
   .two-column,
   .compact-form-row-main,
   .compact-form-row-money,

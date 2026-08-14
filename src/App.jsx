@@ -9,6 +9,7 @@ import { Parties } from "./components/Parties.jsx";
 import { Payments } from "./components/Payments.jsx";
 import { Products } from "./components/Products.jsx";
 import { Sidebar } from "./components/Sidebar.jsx";
+import { Summary } from "./components/Summary.jsx";
 import { Topbar } from "./components/Topbar.jsx";
 import { formatApiError, todayISO } from "./utils/format.js";
 
@@ -55,13 +56,17 @@ export default function App() {
   const [currentStock, setCurrentStock] = useState([]);
   const [history, setHistory] = useState([]);
   const [payments, setPayments] = useState([]);
-  const [paymentSummary, setPaymentSummary] = useState({
+  const [summary, setSummary] = useState({
     purchaseAmount: 0,
     saleAmount: 0,
     paidAmount: 0,
     receivedAmount: 0,
     receivableAmount: 0,
-    payableAmount: 0
+    payableAmount: 0,
+    buyPackets: 0,
+    buyWeight: 0,
+    sellPackets: 0,
+    sellWeight: 0
   });
   const [partyDetails, setPartyDetails] = useState(null);
   const [selectedPartyId, setSelectedPartyId] = useState("");
@@ -115,6 +120,11 @@ export default function App() {
     from: "",
     to: ""
   });
+  const [summaryFilters, setSummaryFilters] = useState({
+    partyId: "",
+    from: "",
+    to: ""
+  });
 
   const productOptions = useMemo(
     () => products.map((product) => ({ value: product._id, label: product.name })),
@@ -161,16 +171,21 @@ export default function App() {
     setPayments(data);
   }
 
-  async function loadPaymentSummary() {
-    const data = await api("/payments/summary");
-    setPaymentSummary(data);
+  async function loadSummary(filters = summaryFilters) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+    });
+    const query = params.toString();
+    const data = await api(`/summary${query ? `?${query}` : ""}`);
+    setSummary(data);
   }
 
   async function refreshAll() {
     setLoading(true);
     setError("");
     try {
-      await Promise.all([loadProducts(), loadParties(), loadCurrentStock(), loadHistory(), loadPayments(), loadPaymentSummary()]);
+      await Promise.all([loadProducts(), loadParties(), loadCurrentStock(), loadHistory(), loadPayments(), loadSummary()]);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -208,7 +223,7 @@ export default function App() {
       });
       if (kind === "in") setStockInForm(emptyMovementForm);
       if (kind === "out") setStockOutForm(emptyMovementForm);
-      await Promise.all([loadCurrentStock(), loadHistory(), loadPayments(), loadPaymentSummary(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+      await Promise.all([loadCurrentStock(), loadHistory(), loadPayments(), loadSummary(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
       setSubmitStatus("saved");
       resetSubmitStatus(setSubmitStatus);
     } catch (requestError) {
@@ -362,7 +377,7 @@ export default function App() {
         mode: "Cash",
         note: ""
       });
-      await Promise.all([loadPayments(), loadPaymentSummary(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+      await Promise.all([loadPayments(), loadSummary(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
       setPaymentSubmitStatus("saved");
       resetSubmitStatus(setPaymentSubmitStatus);
     } catch (requestError) {
@@ -419,7 +434,36 @@ export default function App() {
         })
       });
 
-      await Promise.all([loadCurrentStock(), loadHistory(), loadPayments(), loadPaymentSummary(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+      await Promise.all([loadCurrentStock(), loadHistory(), loadPayments(), loadSummary(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function submitSummaryFilters(event) {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      await loadSummary(summaryFilters);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function resetSummaryFilters() {
+    const emptyFilters = { partyId: "", from: "", to: "" };
+    setSummaryFilters(emptyFilters);
+    setLoading(true);
+    setError("");
+
+    try {
+      await loadSummary(emptyFilters);
+    } catch (requestError) {
+      setError(requestError.message);
     } finally {
       setLoading(false);
     }
@@ -433,6 +477,17 @@ export default function App() {
         <Alerts error={error} notice={notice} />
 
         {activeTab === "current" && <CurrentStock stock={currentStock} loading={loading} />}
+        {activeTab === "summary" && (
+          <Summary
+            parties={parties}
+            summary={summary}
+            filters={summaryFilters}
+            setFilters={setSummaryFilters}
+            onSearch={submitSummaryFilters}
+            onReset={resetSummaryFilters}
+            loading={loading}
+          />
+        )}
         {activeTab === "in" && (
           <section className="content-section">
             <MovementForm
@@ -528,7 +583,6 @@ export default function App() {
           <Payments
             parties={parties}
             payments={payments}
-            summary={paymentSummary}
             filters={paymentFilters}
             setFilters={setPaymentFilters}
             paymentForm={paymentForm}

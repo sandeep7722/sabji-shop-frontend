@@ -2,6 +2,7 @@ import React from "react";
 import {
   ArrowDownToLine,
   ArrowUpFromLine,
+  BarChart3,
   Boxes,
   ClipboardList,
   PackagePlus,
@@ -12,6 +13,7 @@ import {
 
 export const tabs = [
   { id: "current", label: "Current Stock", icon: Boxes },
+  { id: "summary", label: "Summary", icon: BarChart3 },
   { id: "in", label: "Stock IN", icon: ArrowDownToLine },
   { id: "out", label: "Stock OUT", icon: ArrowUpFromLine },
   { id: "history", label: "History", icon: ClipboardList },

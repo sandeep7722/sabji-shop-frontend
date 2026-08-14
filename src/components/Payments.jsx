@@ -7,7 +7,6 @@ import { SubmitButton } from "./SubmitButton.jsx";
 export function Payments({
   parties,
   payments,
-  summary,
   filters,
   setFilters,
   paymentForm,
@@ -61,25 +60,6 @@ export function Payments({
 
   return (
     <section className="content-section">
-      <div className="metric-grid four-metrics">
-        <div className="metric">
-          <span>Total Buy</span>
-          <strong>{formatMoney(summary.purchaseAmount)}</strong>
-        </div>
-        <div className="metric">
-          <span>Total Sell</span>
-          <strong>{formatMoney(summary.saleAmount)}</strong>
-        </div>
-        <div className="metric">
-          <span>Total Payable</span>
-          <strong className="negative">{formatMoney(summary.payableAmount)}</strong>
-        </div>
-        <div className="metric">
-          <span>Total Receivable</span>
-          <strong className="positive">{formatMoney(summary.receivableAmount)}</strong>
-        </div>
-      </div>
-
       <button className="filter-toggle" type="button" onClick={() => setIsAddPaymentOpen((current) => !current)}>
         <span>
           <Plus size={17} />
