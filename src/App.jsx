@@ -180,7 +180,6 @@ export default function App() {
       if (kind === "in") setStockInForm(emptyMovementForm);
       if (kind === "out") setStockOutForm(emptyMovementForm);
       await Promise.all([loadCurrentStock(), loadHistory(), loadPayments(), loadPaymentSummary(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
-      setActiveTab("current");
     } catch (requestError) {
       setError(formatApiError(requestError));
     } finally {
@@ -347,19 +346,33 @@ export default function App() {
 
         {activeTab === "current" && <CurrentStock stock={currentStock} loading={loading} />}
         {activeTab === "in" && (
-          <MovementForm
-            title="Add Stock"
-            submitLabel="Save Stock IN"
-            form={stockInForm}
-            setForm={setStockInForm}
-            productOptions={productOptions}
-            partyOptions={partyOptions}
-            onSubmit={(event) => submitMovement(event, "in")}
-            partyLabel="Dealer / Party"
-            paymentLabel="Paid Now"
-            notePlaceholder="Fresh onion stock"
-            loading={loading}
-          />
+          <section className="content-section">
+            <MovementForm
+              title="Add Stock"
+              submitLabel="Save Stock IN"
+              form={stockInForm}
+              setForm={setStockInForm}
+              productOptions={productOptions}
+              partyOptions={partyOptions}
+              onSubmit={(event) => submitMovement(event, "in")}
+              partyLabel="Dealer / Party"
+              paymentLabel="Paid Now"
+              notePlaceholder="Fresh onion stock"
+              loading={loading}
+              compact
+            />
+            <History
+              products={products}
+              parties={parties}
+              history={history.filter((movement) => movement.type === "IN")}
+              filters={historyFilters}
+              setFilters={setHistoryFilters}
+              onSubmit={submitHistoryFilters}
+              loading={loading}
+              collapsible
+              defaultCollapsed
+            />
+          </section>
         )}
         {activeTab === "out" && (
           <MovementForm

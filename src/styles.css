@@ -333,6 +333,50 @@ tr:last-child td {
   padding: 20px;
 }
 
+.compact-form {
+  gap: 8px;
+  padding: 8px 12px 10px;
+}
+
+.compact-form h3 {
+  font-size: 16px;
+  line-height: 1.15;
+}
+
+.compact-form-row {
+  display: grid;
+  gap: 10px;
+  align-items: end;
+}
+
+.compact-form-row-main {
+  grid-template-columns: 1.1fr 0.75fr 1.3fr 0.7fr 0.85fr;
+}
+
+.compact-form-row-money {
+  grid-template-columns: 0.9fr 0.9fr 0.85fr 1.4fr;
+}
+
+.compact-form .primary-button {
+  justify-self: start;
+  min-height: 34px;
+  padding: 0 12px;
+}
+
+.compact-form .field {
+  gap: 4px;
+}
+
+.compact-form .field span {
+  font-size: 12px;
+}
+
+.compact-form input,
+.compact-form select {
+  min-height: 34px;
+  padding: 6px 9px;
+}
+
 .form-grid h3 {
   margin: 0;
   font-size: 19px;
@@ -390,6 +434,28 @@ textarea {
   border-radius: 8px;
   padding: 14px;
   box-shadow: var(--shadow);
+}
+
+.filter-toggle {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  padding: 0 12px;
+  font-weight: 800;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.filter-toggle span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .search-button {
@@ -496,6 +562,8 @@ textarea {
   .topbar,
   .metric-grid,
   .two-column,
+  .compact-form-row-main,
+  .compact-form-row-money,
   .party-layout,
   .filters {
     grid-template-columns: 1fr;

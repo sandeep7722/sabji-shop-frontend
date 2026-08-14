@@ -1,46 +1,60 @@
-import React from "react";
-import { CalendarSearch } from "lucide-react";
+import React, { useState } from "react";
+import { CalendarSearch, ChevronDown, ChevronUp, SlidersHorizontal } from "lucide-react";
 import { formatDate, formatMoney, signedClass } from "../utils/format.js";
 import { InputField, SelectField } from "./FormFields.jsx";
 
-export function History({ products, parties, history, filters, setFilters, onSubmit, loading }) {
+export function History({ products, parties, history, filters, setFilters, onSubmit, loading, collapsible = false, defaultCollapsed = false }) {
+  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+
   function setField(field, value) {
     setFilters((current) => ({ ...current, [field]: value }));
   }
 
   return (
     <section className="content-section">
-      <form className="filters" onSubmit={onSubmit}>
-        <SelectField label="Product" value={filters.productId} onChange={(value) => setField("productId", value)}>
-          <option value="">All products</option>
-          {products.map((product) => (
-            <option key={product._id} value={product._id}>
-              {product.name}
-            </option>
-          ))}
-        </SelectField>
-        <SelectField label="Party" value={filters.partyId} onChange={(value) => setField("partyId", value)}>
-          <option value="">All parties</option>
-          {parties.map((party) => (
-            <option key={party._id} value={party._id}>
-              {party.partyCode} - {party.name}
-            </option>
-          ))}
-        </SelectField>
-        <SelectField label="Type" value={filters.type} onChange={(value) => setField("type", value)}>
-          <option value="">All types</option>
-          <option value="IN">IN</option>
-          <option value="OUT">OUT</option>
-          <option value="ADJUSTMENT_IN">ADJUSTMENT IN</option>
-          <option value="ADJUSTMENT_OUT">ADJUSTMENT OUT</option>
-        </SelectField>
-        <InputField label="From" type="date" value={filters.from} onChange={(value) => setField("from", value)} />
-        <InputField label="To" type="date" value={filters.to} onChange={(value) => setField("to", value)} />
-        <button className="primary-button search-button" type="submit" disabled={loading}>
-          <CalendarSearch size={17} />
-          <span>Search</span>
+      {collapsible && (
+        <button className="filter-toggle" type="button" onClick={() => setIsCollapsed((current) => !current)}>
+          <span>
+            <SlidersHorizontal size={17} />
+            Filters
+          </span>
+          {isCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
         </button>
-      </form>
+      )}
+
+      {(!collapsible || !isCollapsed) && (
+        <form className="filters" onSubmit={onSubmit}>
+          <SelectField label="Product" value={filters.productId} onChange={(value) => setField("productId", value)}>
+            <option value="">All products</option>
+            {products.map((product) => (
+              <option key={product._id} value={product._id}>
+                {product.name}
+              </option>
+            ))}
+          </SelectField>
+          <SelectField label="Party" value={filters.partyId} onChange={(value) => setField("partyId", value)}>
+            <option value="">All parties</option>
+            {parties.map((party) => (
+              <option key={party._id} value={party._id}>
+                {party.partyCode} - {party.name}
+              </option>
+            ))}
+          </SelectField>
+          <SelectField label="Type" value={filters.type} onChange={(value) => setField("type", value)}>
+            <option value="">All types</option>
+            <option value="IN">IN</option>
+            <option value="OUT">OUT</option>
+            <option value="ADJUSTMENT_IN">ADJUSTMENT IN</option>
+            <option value="ADJUSTMENT_OUT">ADJUSTMENT OUT</option>
+          </SelectField>
+          <InputField label="From" type="date" value={filters.from} onChange={(value) => setField("from", value)} />
+          <InputField label="To" type="date" value={filters.to} onChange={(value) => setField("to", value)} />
+          <button className="primary-button search-button" type="submit" disabled={loading}>
+            <CalendarSearch size={17} />
+            <span>Search</span>
+          </button>
+        </form>
+      )}
 
       <div className="table-wrap">
         <table>
