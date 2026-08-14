@@ -375,19 +375,33 @@ export default function App() {
           </section>
         )}
         {activeTab === "out" && (
-          <MovementForm
-            title="Remove Stock"
-            submitLabel="Save Stock OUT"
-            form={stockOutForm}
-            setForm={setStockOutForm}
-            productOptions={productOptions}
-            partyOptions={partyOptions}
-            onSubmit={(event) => submitMovement(event, "out")}
-            partyLabel="Buyer / Party"
-            paymentLabel="Received Now"
-            notePlaceholder="Wholesale"
-            loading={loading}
-          />
+          <section className="content-section">
+            <MovementForm
+              title="Remove Stock"
+              submitLabel="Save Stock OUT"
+              form={stockOutForm}
+              setForm={setStockOutForm}
+              productOptions={productOptions}
+              partyOptions={partyOptions}
+              onSubmit={(event) => submitMovement(event, "out")}
+              partyLabel="Buyer / Party"
+              paymentLabel="Received Now"
+              notePlaceholder="Wholesale"
+              loading={loading}
+              compact
+            />
+            <History
+              products={products}
+              parties={parties}
+              history={history.filter((movement) => movement.type === "OUT")}
+              filters={historyFilters}
+              setFilters={setHistoryFilters}
+              onSubmit={submitHistoryFilters}
+              loading={loading}
+              collapsible
+              defaultCollapsed
+            />
+          </section>
         )}
         {activeTab === "history" && (
           <History
