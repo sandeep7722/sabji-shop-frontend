@@ -400,6 +400,31 @@ export default function App() {
     }
   }
 
+  async function updateMovement(movementId, form) {
+    const isStockTrade = ["IN", "OUT"].includes(form.type);
+
+    setLoading(true);
+    setError("");
+
+    try {
+      await api(`/stock/history/${movementId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          ...form,
+          packets: Number(form.packets),
+          weight: Number(form.weight),
+          totalAmount: Number(form.totalAmount || 0),
+          paymentAmount: isStockTrade ? Number(form.paymentAmount || 0) : 0,
+          paymentMode: form.paymentMode
+        })
+      });
+
+      await Promise.all([loadCurrentStock(), loadHistory(), loadPayments(), loadPaymentSummary(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="app-shell">
       <Sidebar activeTab={activeTab} isOpen={isMenuOpen} onChange={setActiveTab} onClose={() => setIsMenuOpen(false)} />
@@ -433,6 +458,7 @@ export default function App() {
               filters={historyFilters}
               setFilters={setHistoryFilters}
               onSubmit={submitHistoryFilters}
+              onUpdateMovement={updateMovement}
               loading={loading}
               collapsible
               defaultCollapsed
@@ -464,6 +490,7 @@ export default function App() {
               filters={historyFilters}
               setFilters={setHistoryFilters}
               onSubmit={submitHistoryFilters}
+              onUpdateMovement={updateMovement}
               loading={loading}
               collapsible
               defaultCollapsed
@@ -478,6 +505,7 @@ export default function App() {
             filters={historyFilters}
             setFilters={setHistoryFilters}
             onSubmit={submitHistoryFilters}
+            onUpdateMovement={updateMovement}
             loading={loading}
             partySubmitStatus={partySubmitStatus}
           />

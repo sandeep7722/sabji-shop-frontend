@@ -369,6 +369,14 @@ tr:last-child td {
   border-bottom: 0;
 }
 
+.edited-row td {
+  background: #fff8d9;
+}
+
+.edited-row:hover td {
+  background: #fff3bd;
+}
+
 .form-grid {
   display: grid;
   gap: 15px;
@@ -504,6 +512,34 @@ textarea {
   min-width: 112px;
 }
 
+.history-edit-form {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  align-items: end;
+  gap: 10px;
+  min-width: 980px;
+}
+
+.history-edit-form .field {
+  gap: 4px;
+}
+
+.history-edit-form input,
+.history-edit-form select {
+  min-height: 36px;
+  padding: 7px 9px;
+}
+
+.history-edit-note {
+  grid-column: span 2;
+}
+
+.history-edit-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .type-badge {
   display: inline-flex;
   align-items: center;
@@ -629,6 +665,7 @@ textarea {
   .compact-form-row-main,
   .compact-form-row-money,
   .product-edit-form,
+  .history-edit-form,
   .party-layout,
   .filters {
     grid-template-columns: 1fr;
@@ -653,6 +690,19 @@ textarea {
 
   .filters {
     align-items: stretch;
+  }
+
+  .history-edit-form {
+    min-width: 0;
+  }
+
+  .history-edit-note {
+    grid-column: auto;
+  }
+
+  .history-edit-actions {
+    align-items: flex-start;
+    flex-wrap: wrap;
   }
 
   .product-actions {
