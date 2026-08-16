@@ -567,7 +567,7 @@ export default function App() {
           <section className="content-section">
             <MovementForm
               title="Add Stock"
-              submitLabel="Save Stock IN"
+              submitLabel="Save"
               form={stockInForm}
               setForm={setStockInForm}
               productOptions={productOptions}
@@ -598,8 +598,8 @@ export default function App() {
         {activeTab === "out" && (
           <section className="content-section">
             <MovementForm
-              title="Remove Stock"
-              submitLabel="Save Stock OUT"
+              title="Sell"
+              submitLabel="Save"
               form={stockOutForm}
               setForm={setStockOutForm}
               productOptions={productOptions}
