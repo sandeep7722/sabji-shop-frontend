@@ -19,7 +19,7 @@ export const tabs = [
   { id: "history", label: "History", icon: ClipboardList },
   { id: "sourceReport", label: "Dealer Buy-Sell Report", icon: Route },
   { id: "customerReport", label: "Customer Sell Report", icon: ShoppingBag },
-  { id: "parties", label: "Parties", icon: Users },
+  { id: "parties", label: "Dealer/Customer", icon: Users },
   { id: "payments", label: "Payments", icon: ReceiptIndianRupee },
   { id: "adjustment", label: "Adjustment", icon: SlidersHorizontal },
   { id: "products", label: "Products", icon: PackagePlus }

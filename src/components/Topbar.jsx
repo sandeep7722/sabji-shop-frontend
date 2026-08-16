@@ -7,7 +7,7 @@ const quickActions = [
   { id: "out", label: "Sell", icon: ArrowUpFromLine },
   { id: "history", label: "History", icon: ClipboardList },
   { id: "payments", label: "Payments", icon: ReceiptIndianRupee },
-  { id: "parties", label: "Parties", icon: Users }
+  { id: "parties", label: "Dealer/Customer", icon: Users }
 ];
 
 export function Topbar({ activeTab, loading, onRefresh, onMenuClick, onTabChange }) {
