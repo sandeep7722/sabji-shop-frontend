@@ -307,6 +307,10 @@ textarea {
   grid-template-columns: repeat(4, minmax(170px, 1fr));
 }
 
+.metric-grid.source-report-grid {
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+}
+
 .metric,
 .form-grid,
 .product-list,
@@ -402,7 +406,7 @@ tr:last-child td {
 }
 
 .compact-form-row-money {
-  grid-template-columns: 0.9fr 0.9fr 0.85fr 1.4fr;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
 
 .compact-form .primary-button {
@@ -487,6 +491,18 @@ textarea {
 .summary-filter-form {
   display: grid;
   grid-template-columns: minmax(220px, 1.2fr) minmax(150px, 0.7fr) minmax(150px, 0.7fr) auto auto;
+  align-items: end;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+
+.source-report-filters {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.2fr) minmax(150px, 0.7fr) minmax(150px, 0.7fr) auto auto;
   align-items: end;
   gap: 12px;
   background: var(--panel);
@@ -743,6 +759,7 @@ textarea {
   .topbar,
   .metric-grid,
   .summary-filter-form,
+  .source-report-filters,
   .two-column,
   .compact-form-row-main,
   .compact-form-row-money,

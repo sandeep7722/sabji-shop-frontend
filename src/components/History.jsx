@@ -13,6 +13,7 @@ function createEditForm(movement) {
   return {
     productId: movement.productId?._id || movement.productId || "",
     partyId: movement.partyId?._id || movement.partyId || "",
+    sourcePartyId: movement.sourcePartyId?._id || movement.sourcePartyId || "",
     type: movement.type || "IN",
     date: dateInputValue(movement.date),
     packets: String(movement.packets ?? ""),
@@ -122,6 +123,7 @@ export function History({ products, parties, history, filters, setFilters, onSub
               <th>Product</th>
               <th>Type</th>
               <th>Party</th>
+              <th>Bought From</th>
               <th>Packets</th>
               <th>Weight</th>
               <th>Total Amount</th>
@@ -134,7 +136,7 @@ export function History({ products, parties, history, filters, setFilters, onSub
             {history.map((movement) =>
               editingId === movement._id && editForm ? (
                 <tr className={movement.isEdited ? "edited-row" : ""} key={movement._id}>
-                  <td colSpan="10">
+                  <td colSpan="11">
                     <form className="history-edit-form" onSubmit={(event) => submitEdit(event, movement._id)}>
                       <SelectField label="Product" value={editForm.productId} required onChange={(value) => setEditField("productId", value)}>
                         <option value="">Select product</option>
@@ -152,6 +154,14 @@ export function History({ products, parties, history, filters, setFilters, onSub
                       </SelectField>
                       <SelectField label="Party" value={editForm.partyId} onChange={(value) => setEditField("partyId", value)}>
                         <option value="">No party</option>
+                        {parties.map((party) => (
+                          <option key={party._id} value={party._id}>
+                            {party.partyCode} - {party.name}
+                          </option>
+                        ))}
+                      </SelectField>
+                      <SelectField label="Bought From" value={editForm.sourcePartyId} disabled={editForm.type !== "OUT"} onChange={(value) => setEditField("sourcePartyId", value)}>
+                        <option value="">No source</option>
                         {parties.map((party) => (
                           <option key={party._id} value={party._id}>
                             {party.partyCode} - {party.name}
@@ -199,6 +209,7 @@ export function History({ products, parties, history, filters, setFilters, onSub
                     <span className={`type-badge ${movement.type.toLowerCase().replace("_", "-")}`}>{movement.type.replace("_", " ")}</span>
                   </td>
                   <td>{movement.partyId ? `${movement.partyId.partyCode} - ${movement.partyId.name}` : movement.partyName || movement.reason || "-"}</td>
+                  <td>{movement.sourcePartyId ? `${movement.sourcePartyId.partyCode} - ${movement.sourcePartyId.name}` : "-"}</td>
                   <td className={signedClass(movement.signedPackets)}>{movement.signedPackets}</td>
                   <td className={signedClass(movement.signedWeight)}>{movement.signedWeight} KG</td>
                   <td>{formatMoney(movement.totalAmount)}</td>
@@ -216,7 +227,7 @@ export function History({ products, parties, history, filters, setFilters, onSub
             )}
             {!history.length && (
               <tr>
-                <td colSpan="10">{loading ? "Loading history..." : "No movements found."}</td>
+                <td colSpan="11">{loading ? "Loading history..." : "No movements found."}</td>
               </tr>
             )}
           </tbody>

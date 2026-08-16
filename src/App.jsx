@@ -9,6 +9,7 @@ import { Parties } from "./components/Parties.jsx";
 import { Payments } from "./components/Payments.jsx";
 import { Products } from "./components/Products.jsx";
 import { Sidebar } from "./components/Sidebar.jsx";
+import { SourceSalesReport } from "./components/SourceSalesReport.jsx";
 import { Summary } from "./components/Summary.jsx";
 import { Topbar } from "./components/Topbar.jsx";
 import { formatApiError, todayISO } from "./utils/format.js";
@@ -16,6 +17,7 @@ import { formatApiError, todayISO } from "./utils/format.js";
 const emptyMovementForm = {
   productId: "",
   partyId: "",
+  sourcePartyId: "",
   date: todayISO(),
   partyName: "",
   packets: "",
@@ -56,6 +58,19 @@ export default function App() {
   const [currentStock, setCurrentStock] = useState([]);
   const [history, setHistory] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [sourceSalesReport, setSourceSalesReport] = useState({
+    totals: {
+      buyPackets: 0,
+      buyWeight: 0,
+      buyAmount: 0,
+      paidAmount: 0,
+      salePackets: 0,
+      saleWeight: 0,
+      saleAmount: 0,
+      receivedAmount: 0
+    },
+    rows: []
+  });
   const [summary, setSummary] = useState({
     purchaseAmount: 0,
     saleAmount: 0,
@@ -125,6 +140,11 @@ export default function App() {
     from: "",
     to: ""
   });
+  const [sourceSalesFilters, setSourceSalesFilters] = useState({
+    sourcePartyId: "",
+    from: "",
+    to: ""
+  });
 
   const productOptions = useMemo(
     () => products.map((product) => ({ value: product._id, label: product.name })),
@@ -171,6 +191,16 @@ export default function App() {
     setPayments(data);
   }
 
+  async function loadSourceSalesReport(filters = sourceSalesFilters) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+    });
+    const query = params.toString();
+    const data = await api(`/stock/source-sales${query ? `?${query}` : ""}`);
+    setSourceSalesReport(data);
+  }
+
   async function loadSummary(filters = summaryFilters) {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
@@ -185,7 +215,7 @@ export default function App() {
     setLoading(true);
     setError("");
     try {
-      await Promise.all([loadProducts(), loadParties(), loadCurrentStock(), loadHistory(), loadPayments(), loadSummary()]);
+      await Promise.all([loadProducts(), loadParties(), loadCurrentStock(), loadHistory(), loadPayments(), loadSummary(), loadSourceSalesReport()]);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -218,12 +248,13 @@ export default function App() {
           weight: Number(form.weight),
           totalAmount: Number(form.totalAmount || 0),
           paymentAmount: Number(form.paymentAmount || 0),
-          paymentMode: form.paymentMode
+          paymentMode: form.paymentMode,
+          sourcePartyId: form.sourcePartyId
         })
       });
       if (kind === "in") setStockInForm(emptyMovementForm);
       if (kind === "out") setStockOutForm(emptyMovementForm);
-      await Promise.all([loadCurrentStock(), loadHistory(), loadPayments(), loadSummary(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+      await Promise.all([loadCurrentStock(), loadHistory(), loadPayments(), loadSummary(), loadSourceSalesReport(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
       setSubmitStatus("saved");
       resetSubmitStatus(setSubmitStatus);
     } catch (requestError) {
@@ -298,7 +329,7 @@ export default function App() {
         method: "PATCH",
         body: JSON.stringify({ name: nextName })
       });
-      await Promise.all([loadProducts(), loadCurrentStock(), loadHistory(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+      await Promise.all([loadProducts(), loadCurrentStock(), loadHistory(), loadSourceSalesReport(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
     } finally {
       setLoading(false);
     }
@@ -345,7 +376,7 @@ export default function App() {
         method: "PATCH",
         body: JSON.stringify(form)
       });
-      await Promise.all([loadParties(), loadHistory(), loadPayments(), loadSummary(), selectedPartyId === partyId ? loadPartyDetails() : Promise.resolve()]);
+      await Promise.all([loadParties(), loadHistory(), loadPayments(), loadSummary(), loadSourceSalesReport(), selectedPartyId === partyId ? loadPartyDetails() : Promise.resolve()]);
     } finally {
       setLoading(false);
     }
@@ -449,7 +480,7 @@ export default function App() {
         })
       });
 
-      await Promise.all([loadCurrentStock(), loadHistory(), loadPayments(), loadSummary(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+      await Promise.all([loadCurrentStock(), loadHistory(), loadPayments(), loadSummary(), loadSourceSalesReport(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
     } finally {
       setLoading(false);
     }
@@ -477,6 +508,35 @@ export default function App() {
 
     try {
       await loadSummary(emptyFilters);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function submitSourceSalesFilters(event) {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      await loadSourceSalesReport(sourceSalesFilters);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function resetSourceSalesFilters() {
+    const emptyFilters = { sourcePartyId: "", from: "", to: "" };
+    setSourceSalesFilters(emptyFilters);
+    setLoading(true);
+    setError("");
+
+    try {
+      await loadSourceSalesReport(emptyFilters);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -546,6 +606,7 @@ export default function App() {
               partyOptions={partyOptions}
               onSubmit={(event) => submitMovement(event, "out")}
               partyLabel="Buyer / Party"
+              sourcePartyLabel="Bought From Party (Optional)"
               paymentLabel="Received Now"
               notePlaceholder="Wholesale"
               loading={loading}
@@ -578,6 +639,17 @@ export default function App() {
             onUpdateMovement={updateMovement}
             loading={loading}
             partySubmitStatus={partySubmitStatus}
+          />
+        )}
+        {activeTab === "sourceReport" && (
+          <SourceSalesReport
+            parties={parties}
+            report={sourceSalesReport}
+            filters={sourceSalesFilters}
+            setFilters={setSourceSalesFilters}
+            onSearch={submitSourceSalesFilters}
+            onReset={resetSourceSalesFilters}
+            loading={loading}
           />
         )}
         {activeTab === "parties" && (

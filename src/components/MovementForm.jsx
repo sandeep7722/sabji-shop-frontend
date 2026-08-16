@@ -11,6 +11,7 @@ export function MovementForm({
   partyOptions,
   onSubmit,
   partyLabel,
+  sourcePartyLabel = "",
   paymentLabel,
   notePlaceholder,
   loading,
@@ -56,6 +57,16 @@ export function MovementForm({
           />
         </div>
         <div className={compact ? "compact-form-row compact-form-row-money" : "two-column"}>
+          {sourcePartyLabel && (
+            <SelectField label={sourcePartyLabel} value={form.sourcePartyId || ""} onChange={(value) => setField("sourcePartyId", value)}>
+              <option value="">Select source</option>
+              {partyOptions.map((party) => (
+                <option key={party.value} value={party.value}>
+                  {party.label}
+                </option>
+              ))}
+            </SelectField>
+          )}
           <InputField
             label="Total Amount"
             type="number"

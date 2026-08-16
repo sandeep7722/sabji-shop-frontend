@@ -7,6 +7,7 @@ import {
   ClipboardList,
   PackagePlus,
   ReceiptIndianRupee,
+  Route,
   SlidersHorizontal,
   Users
 } from "lucide-react";
@@ -17,6 +18,7 @@ export const tabs = [
   { id: "in", label: "Stock IN", icon: ArrowDownToLine },
   { id: "out", label: "Stock OUT", icon: ArrowUpFromLine },
   { id: "history", label: "History", icon: ClipboardList },
+  { id: "sourceReport", label: "Party Sale Report", icon: Route },
   { id: "parties", label: "Parties", icon: Users },
   { id: "payments", label: "Payments", icon: ReceiptIndianRupee },
   { id: "adjustment", label: "Adjustment", icon: SlidersHorizontal },
