@@ -336,6 +336,21 @@ export default function App() {
     }
   }
 
+  async function updateParty(partyId, form) {
+    setLoading(true);
+    setError("");
+
+    try {
+      await api(`/parties/${partyId}`, {
+        method: "PATCH",
+        body: JSON.stringify(form)
+      });
+      await Promise.all([loadParties(), loadHistory(), loadPayments(), loadSummary(), selectedPartyId === partyId ? loadPartyDetails() : Promise.resolve()]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function loadPartyDetails() {
     if (!selectedPartyId) return;
 
@@ -568,14 +583,12 @@ export default function App() {
         {activeTab === "parties" && (
           <Parties
             parties={parties}
-            selectedPartyId={selectedPartyId}
-            setSelectedPartyId={setSelectedPartyId}
-            partyDetails={partyDetails}
             partyForm={partyForm}
             setPartyForm={setPartyForm}
             onCreateParty={submitParty}
-            onLoadPartyDetails={loadPartyDetails}
+            onUpdateParty={updateParty}
             loading={loading}
+            partySubmitStatus={partySubmitStatus}
             submitError={submitErrors.party}
           />
         )}
