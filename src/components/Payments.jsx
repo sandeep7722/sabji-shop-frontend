@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { CalendarSearch, ChevronDown, ChevronUp, Plus, SlidersHorizontal } from "lucide-react";
 import { formatDate, formatMoney } from "../utils/format.js";
 import { InputField, SelectField } from "./FormFields.jsx";
@@ -18,33 +18,6 @@ export function Payments({
   submitError = ""
 }) {
   const [isAddPaymentOpen, setIsAddPaymentOpen] = useState(false);
-  const [tableFilters, setTableFilters] = useState({
-    source: "",
-    mode: "",
-    search: ""
-  });
-
-  const paymentModes = useMemo(() => {
-    const modes = new Set(payments.map((payment) => payment.mode).filter(Boolean));
-    return Array.from(modes).sort();
-  }, [payments]);
-
-  const filteredPayments = useMemo(() => {
-    const searchText = tableFilters.search.trim().toLowerCase();
-
-    return payments.filter((payment) => {
-      const source = payment.referenceType === "STOCK_MOVEMENT" ? "STOCK" : "MANUAL";
-      const partyText = payment.partyId ? `${payment.partyId.partyCode} ${payment.partyId.name}` : "";
-      const noteText = payment.note || "";
-      const amountText = String(payment.amount || "");
-
-      if (tableFilters.source && tableFilters.source !== source) return false;
-      if (tableFilters.mode && tableFilters.mode !== payment.mode) return false;
-      if (searchText && !`${partyText} ${noteText} ${amountText}`.toLowerCase().includes(searchText)) return false;
-
-      return true;
-    });
-  }, [payments, tableFilters]);
 
   function setPaymentField(field, value) {
     setPaymentForm((current) => ({ ...current, [field]: value }));
@@ -52,10 +25,6 @@ export function Payments({
 
   function setFilterField(field, value) {
     setFilters((current) => ({ ...current, [field]: value }));
-  }
-
-  function setTableFilterField(field, value) {
-    setTableFilters((current) => ({ ...current, [field]: value }));
   }
 
   return (
@@ -125,26 +94,6 @@ export function Payments({
         </button>
       </form>
 
-      <div className="table-filter-bar">
-        <SelectField label="Table Source" value={tableFilters.source} onChange={(value) => setTableFilterField("source", value)}>
-          <option value="">All sources</option>
-          <option value="MANUAL">Manual payments</option>
-          <option value="STOCK">Stock linked</option>
-        </SelectField>
-        <SelectField label="Mode" value={tableFilters.mode} onChange={(value) => setTableFilterField("mode", value)}>
-          <option value="">All modes</option>
-          {paymentModes.map((mode) => (
-            <option key={mode} value={mode}>
-              {mode}
-            </option>
-          ))}
-        </SelectField>
-        <InputField label="Search Table" value={tableFilters.search} placeholder="Party, note, amount" onChange={(value) => setTableFilterField("search", value)} />
-        <button className="icon-button text-button" type="button" onClick={() => setTableFilters({ source: "", mode: "", search: "" })}>
-          <span>Clear</span>
-        </button>
-      </div>
-
       <div className="table-wrap">
         <table>
           <thead>
@@ -159,7 +108,7 @@ export function Payments({
             </tr>
           </thead>
           <tbody>
-            {filteredPayments.map((payment) => (
+            {payments.map((payment) => (
               <tr key={payment._id}>
                 <td>{formatDate(payment.date)}</td>
                 <td>{payment.partyId ? `${payment.partyId.partyCode} - ${payment.partyId.name}` : "-"}</td>
@@ -170,7 +119,7 @@ export function Payments({
                 <td>{payment.note || "-"}</td>
               </tr>
             ))}
-            {!filteredPayments.length && (
+            {!payments.length && (
               <tr>
                 <td colSpan="7">No payments found.</td>
               </tr>

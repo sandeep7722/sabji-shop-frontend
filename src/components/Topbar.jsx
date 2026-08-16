@@ -1,6 +1,5 @@
 import React from "react";
 import { ArrowDownToLine, ArrowUpFromLine, BarChart3, Boxes, ClipboardList, Menu, RefreshCw, ReceiptIndianRupee, Users } from "lucide-react";
-import { tabs } from "./Sidebar.jsx";
 
 const quickActions = [
   { id: "current", label: "Home", icon: Boxes },
@@ -20,8 +19,7 @@ export function Topbar({ activeTab, loading, onRefresh, onMenuClick, onTabChange
           <Menu size={22} />
         </button>
         <div>
-          <p className="eyebrow">Inventory ledger</p>
-          <h2>{tabs.find((tab) => tab.id === activeTab)?.label}</h2>
+          <h2>SV Trading Company</h2>
         </div>
       </div>
       <div className="topbar-actions">

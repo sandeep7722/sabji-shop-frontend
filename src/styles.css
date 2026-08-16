@@ -164,18 +164,12 @@ textarea {
   gap: 8px;
 }
 
-.eyebrow {
-  margin: 0 0 4px;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
 .topbar h2 {
   margin: 0;
-  font-size: 30px;
-  line-height: 1.2;
+  color: var(--primary-dark);
+  font-size: 21px;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .icon-button,
@@ -541,8 +535,7 @@ textarea {
   grid-column: 1 / -1;
 }
 
-.payment-search-form,
-.table-filter-bar {
+.payment-search-form {
   display: grid;
   align-items: end;
   gap: 12px;
@@ -565,10 +558,6 @@ textarea {
   color: var(--text);
   font-weight: 800;
   white-space: nowrap;
-}
-
-.table-filter-bar {
-  grid-template-columns: 0.9fr 0.8fr minmax(180px, 1.2fr) auto;
 }
 
 .history-edit-form {
@@ -726,7 +715,6 @@ textarea {
   .compact-form-row-money,
   .payment-add-form,
   .payment-search-form,
-  .table-filter-bar,
   .product-edit-form,
   .history-edit-form,
   .party-layout,
