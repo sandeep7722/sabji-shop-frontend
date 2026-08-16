@@ -41,9 +41,11 @@ textarea {
   inset: 0 auto 0 0;
   z-index: 20;
   width: 260px;
+  max-height: 100vh;
   background: #16222f;
   color: #fff;
   padding: 22px 16px;
+  overflow-y: auto;
   transform: translateX(-105%);
   transition: transform 180ms ease;
   box-shadow: 16px 0 42px rgba(13, 23, 35, 0.22);
@@ -72,7 +74,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 4px 6px 24px;
+  padding: 4px 6px 18px;
 }
 
 .brand-mark {
