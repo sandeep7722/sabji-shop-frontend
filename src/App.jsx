@@ -497,6 +497,21 @@ export default function App() {
     }
   }
 
+  async function resetHistoryFilters() {
+    const emptyFilters = { productId: "", partyId: "", type: "", from: "", to: "" };
+    setHistoryFilters(emptyFilters);
+    setLoading(true);
+    setError("");
+
+    try {
+      await loadHistory(emptyFilters);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function updateMovement(movementId, form) {
     const isStockTrade = ["IN", "OUT"].includes(form.type);
 
@@ -662,6 +677,7 @@ export default function App() {
               filters={historyFilters}
               setFilters={setHistoryFilters}
               onSubmit={submitHistoryFilters}
+              onReset={resetHistoryFilters}
               onUpdateMovement={updateMovement}
               loading={loading}
               collapsible
@@ -696,6 +712,7 @@ export default function App() {
               filters={historyFilters}
               setFilters={setHistoryFilters}
               onSubmit={submitHistoryFilters}
+              onReset={resetHistoryFilters}
               onUpdateMovement={updateMovement}
               loading={loading}
               collapsible
@@ -711,9 +728,11 @@ export default function App() {
             filters={historyFilters}
             setFilters={setHistoryFilters}
             onSubmit={submitHistoryFilters}
+            onReset={resetHistoryFilters}
             onUpdateMovement={updateMovement}
             loading={loading}
             partySubmitStatus={partySubmitStatus}
+            showSummary
           />
         )}
         {activeTab === "sourceReport" && (

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CalendarSearch, ChevronDown, ChevronUp, Pencil, SlidersHorizontal, X } from "lucide-react";
+import { CalendarSearch, ChevronDown, ChevronUp, Pencil, RotateCcw, SlidersHorizontal, X } from "lucide-react";
 import { formatApiError, formatDate, formatMoney, signedClass } from "../utils/format.js";
 import { InputField, SelectField } from "./FormFields.jsx";
 import { SubmitButton } from "./SubmitButton.jsx";
@@ -25,8 +25,84 @@ function createEditForm(movement) {
   };
 }
 
-export function History({ products, parties, history, filters, setFilters, onSubmit, onUpdateMovement, loading, collapsible = false, defaultCollapsed = false }) {
+function calculateHistorySummary(history) {
+  const summary = history.reduce(
+    (result, movement) => {
+      const amount = Number(movement.totalAmount || 0);
+      const paymentAmount = Number(movement.paymentAmount || 0);
+      const partyId = movement.partyId?._id || movement.partyId || "";
+      const partyName = movement.partyId ? `${movement.partyId.partyCode} - ${movement.partyId.name}` : movement.partyName || "Unknown party";
+
+      if (partyId && !result.partyBalances.has(partyId)) {
+        result.partyBalances.set(partyId, { partyName, balance: 0 });
+      }
+
+      const partyBalance = partyId ? result.partyBalances.get(partyId) : null;
+
+      if (movement.type === "IN") {
+        result.buyAmount += amount;
+        result.buyPackets += movement.packets || 0;
+        result.buyWeight += movement.weight || 0;
+        result.paidAmount += paymentAmount;
+        result.payableAmount += Math.max(0, amount - paymentAmount);
+        if (partyBalance) partyBalance.balance -= amount - paymentAmount;
+      }
+
+      if (movement.type === "OUT") {
+        result.sellAmount += amount;
+        result.sellPackets += movement.packets || 0;
+        result.sellWeight += movement.weight || 0;
+        result.receivedAmount += paymentAmount;
+        result.receivableAmount += Math.max(0, amount - paymentAmount);
+        if (partyBalance) partyBalance.balance += amount - paymentAmount;
+      }
+
+      if (movement.type === "IN" || movement.type === "OUT") {
+        result.totalAmount += amount;
+      }
+
+      return result;
+    },
+    {
+      buyAmount: 0,
+      sellAmount: 0,
+      totalAmount: 0,
+      paidAmount: 0,
+      receivedAmount: 0,
+      payableAmount: 0,
+      receivableAmount: 0,
+      buyPackets: 0,
+      buyWeight: 0,
+      sellPackets: 0,
+      sellWeight: 0,
+      partyBalances: new Map()
+    }
+  );
+
+  summary.suggestions = Array.from(summary.partyBalances.values())
+    .filter((party) => party.balance !== 0)
+    .sort((first, second) => Math.abs(second.balance) - Math.abs(first.balance))
+    .slice(0, 4);
+
+  return summary;
+}
+
+export function History({
+  products,
+  parties,
+  history,
+  filters,
+  setFilters,
+  onSubmit,
+  onReset,
+  onUpdateMovement,
+  loading,
+  collapsible = false,
+  defaultCollapsed = false,
+  showSummary = false
+}) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+  const [isSummaryCollapsed, setIsSummaryCollapsed] = useState(true);
   const [editingId, setEditingId] = useState("");
   const [editForm, setEditForm] = useState(null);
   const [editStatus, setEditStatus] = useState("idle");
@@ -68,6 +144,8 @@ export function History({ products, parties, history, filters, setFilters, onSub
       setEditError(formatApiError(requestError));
     }
   }
+
+  const historySummary = calculateHistorySummary(history);
 
   return (
     <section className="content-section">
@@ -112,7 +190,80 @@ export function History({ products, parties, history, filters, setFilters, onSub
             <CalendarSearch size={17} />
             <span>Search</span>
           </button>
+          {onReset && (
+            <button className="icon-button text-button" type="button" disabled={loading} onClick={onReset}>
+              <RotateCcw size={17} />
+              <span>Reset</span>
+            </button>
+          )}
         </form>
+      )}
+
+      {showSummary && (
+        <>
+          <button className="filter-toggle" type="button" onClick={() => setIsSummaryCollapsed((current) => !current)}>
+            <span>
+              <SlidersHorizontal size={17} />
+              History Summary
+            </span>
+            {isSummaryCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+          </button>
+
+          {!isSummaryCollapsed && (
+            <div className="metric-grid history-summary-grid">
+              <div className="metric">
+                <span>Total Buy</span>
+                <strong>{formatMoney(historySummary.buyAmount)}</strong>
+              </div>
+              <div className="metric">
+                <span>Total Sell</span>
+                <strong>{formatMoney(historySummary.sellAmount)}</strong>
+              </div>
+              <div className="metric">
+                <span>Total Amount</span>
+                <strong>{formatMoney(historySummary.totalAmount)}</strong>
+              </div>
+              <div className="metric">
+                <span>Total Paid</span>
+                <strong className="negative">{formatMoney(historySummary.paidAmount)}</strong>
+              </div>
+              <div className="metric">
+                <span>Total Received</span>
+                <strong className="positive">{formatMoney(historySummary.receivedAmount)}</strong>
+              </div>
+              <div className="metric">
+                <span>Payable Remaining</span>
+                <strong className={historySummary.payableAmount > 0 ? "negative" : "positive"}>{formatMoney(historySummary.payableAmount)}</strong>
+              </div>
+              <div className="metric">
+                <span>Receivable Remaining</span>
+                <strong className={historySummary.receivableAmount > 0 ? "negative" : "positive"}>{formatMoney(historySummary.receivableAmount)}</strong>
+              </div>
+              <div className="metric">
+                <span>Buy Packets / KG</span>
+                <strong>{historySummary.buyPackets} / {historySummary.buyWeight} KG</strong>
+              </div>
+              <div className="metric">
+                <span>Sell Packets / KG</span>
+                <strong>{historySummary.sellPackets} / {historySummary.sellWeight} KG</strong>
+              </div>
+              <div className="history-suggestions">
+                <strong>Suggestions</strong>
+                {historySummary.suggestions.length ? (
+                  historySummary.suggestions.map((party) => (
+                    <span key={party.partyName} className={party.balance > 0 ? "negative" : "positive"}>
+                      {party.balance > 0
+                        ? `${party.partyName} se ${formatMoney(party.balance)} collect karna baki hai`
+                        : `Aapko ${party.partyName} ko ${formatMoney(Math.abs(party.balance))} pay karna baki hai`}
+                    </span>
+                  ))
+                ) : (
+                  <span className="positive">Filtered history settled dikh rahi hai.</span>
+                )}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <div className="table-wrap">

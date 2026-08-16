@@ -317,6 +317,32 @@ textarea {
   grid-template-columns: repeat(5, minmax(160px, 1fr));
 }
 
+.metric-grid.history-summary-grid {
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+}
+
+.history-suggestions {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
+}
+
+.history-suggestions strong {
+  color: var(--text);
+}
+
+.history-suggestions span {
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .metric,
 .form-grid,
 .product-list,
@@ -517,7 +543,7 @@ textarea {
 
 .filters {
   display: grid;
-  grid-template-columns: 1.1fr 1.1fr 1fr 1fr 1fr auto;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
   align-items: end;
   gap: 12px;
   background: var(--panel);
