@@ -1,0 +1,123 @@
+import React, { useMemo, useState } from "react";
+import { CalendarSearch, RotateCcw } from "lucide-react";
+import { formatDate, formatMoney } from "../utils/format.js";
+import { InputField } from "./FormFields.jsx";
+
+export function CustomerSalesReport({ parties, report, filters, setFilters, onSearch, onReset, loading }) {
+  const [customerSearch, setCustomerSearch] = useState("");
+
+  const customerOptions = useMemo(() => {
+    return parties.map((party) => ({
+      id: party._id,
+      label: `${party.partyCode} - ${party.name}${party.phone ? ` (${party.phone})` : ""}`
+    }));
+  }, [parties]);
+
+  function setField(field, value) {
+    setFilters((current) => ({ ...current, [field]: value }));
+  }
+
+  function setCustomer(value) {
+    setCustomerSearch(value);
+    const selectedCustomer = customerOptions.find((option) => option.label === value);
+    setField("customerId", selectedCustomer ? selectedCustomer.id : "");
+  }
+
+  function resetFilters() {
+    setCustomerSearch("");
+    onReset();
+  }
+
+  return (
+    <section className="content-section">
+      <form className="customer-report-filters" onSubmit={onSearch}>
+        <label className="field">
+          <span>Customer</span>
+          <input list="customer-options" value={customerSearch} placeholder="Search or select customer" onChange={(event) => setCustomer(event.target.value)} />
+          <datalist id="customer-options">
+            {customerOptions.map((option) => (
+              <option key={option.id} value={option.label} />
+            ))}
+          </datalist>
+        </label>
+        <InputField label="From" type="date" value={filters.from} onChange={(value) => setField("from", value)} />
+        <InputField label="To" type="date" value={filters.to} onChange={(value) => setField("to", value)} />
+        <button className="primary-button search-button" type="submit" disabled={loading}>
+          <CalendarSearch size={17} />
+          <span>Search</span>
+        </button>
+        <button className="icon-button text-button" type="button" disabled={loading} onClick={resetFilters}>
+          <RotateCcw size={17} />
+          <span>Reset</span>
+        </button>
+      </form>
+
+      <div className="metric-grid customer-report-grid">
+        <div className="metric">
+          <span>Total Sell Packet</span>
+          <strong>{report.totals.sellPackets || 0}</strong>
+        </div>
+        <div className="metric">
+          <span>Total Sell KG</span>
+          <strong>{report.totals.sellWeight || 0} KG</strong>
+        </div>
+        <div className="metric">
+          <span>Total Amount</span>
+          <strong>{formatMoney(report.totals.sellAmount)}</strong>
+        </div>
+        <div className="metric">
+          <span>Paid</span>
+          <strong className="positive">{formatMoney(report.totals.paidAmount)}</strong>
+        </div>
+        <div className="metric">
+          <span>Remaining Amount</span>
+          <strong className={report.totals.balanceAmount > 0 ? "negative" : "positive"}>{formatMoney(report.totals.balanceAmount)}</strong>
+        </div>
+      </div>
+
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Bought From</th>
+              <th>Product</th>
+              <th>Packets</th>
+              <th>Weight</th>
+              <th>Amount</th>
+              <th>Paid</th>
+              <th>Remaining Amount</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            {report.rows.map((movement) => {
+              const rowBalance = Math.max(0, (movement.totalAmount || 0) - (movement.paymentAmount || 0));
+
+              return (
+                <tr key={movement._id}>
+                  <td>{formatDate(movement.date)}</td>
+                  <td>{movement.partyId ? `${movement.partyId.partyCode} - ${movement.partyId.name}` : "-"}</td>
+                  <td>{movement.sourcePartyId ? `${movement.sourcePartyId.partyCode} - ${movement.sourcePartyId.name}` : "-"}</td>
+                  <td>{movement.productId?.name || "-"}</td>
+                  <td>{movement.packets}</td>
+                  <td>{movement.weight} KG</td>
+                  <td>{formatMoney(movement.totalAmount)}</td>
+                  <td className="positive">{movement.paymentAmount ? formatMoney(movement.paymentAmount) : "-"}</td>
+                  <td className={rowBalance > 0 ? "negative" : "positive"}>{formatMoney(rowBalance)}</td>
+                  <td>{movement.note || "-"}</td>
+                </tr>
+              );
+            })}
+            {!report.rows.length && (
+              <tr>
+                <td colSpan="10">{loading ? "Loading report..." : "No customer sales found."}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}

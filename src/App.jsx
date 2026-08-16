@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { api } from "./api/client.js";
 import { AdjustmentForm } from "./components/AdjustmentForm.jsx";
 import { Alerts } from "./components/Alerts.jsx";
+import { CustomerSalesReport } from "./components/CustomerSalesReport.jsx";
 import { CurrentStock } from "./components/CurrentStock.jsx";
 import { History } from "./components/History.jsx";
 import { MovementForm } from "./components/MovementForm.jsx";
@@ -69,6 +70,10 @@ export default function App() {
       saleAmount: 0,
       receivedAmount: 0
     },
+    rows: []
+  });
+  const [customerSalesReport, setCustomerSalesReport] = useState({
+    totals: { sellPackets: 0, sellWeight: 0, sellAmount: 0, paidAmount: 0, balanceAmount: 0 },
     rows: []
   });
   const [summary, setSummary] = useState({
@@ -145,6 +150,11 @@ export default function App() {
     from: "",
     to: ""
   });
+  const [customerSalesFilters, setCustomerSalesFilters] = useState({
+    customerId: "",
+    from: "",
+    to: ""
+  });
 
   const productOptions = useMemo(
     () => products.map((product) => ({ value: product._id, label: product.name })),
@@ -201,6 +211,16 @@ export default function App() {
     setSourceSalesReport(data);
   }
 
+  async function loadCustomerSalesReport(filters = customerSalesFilters) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+    });
+    const query = params.toString();
+    const data = await api(`/stock/customer-sales${query ? `?${query}` : ""}`);
+    setCustomerSalesReport(data);
+  }
+
   async function loadSummary(filters = summaryFilters) {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
@@ -215,7 +235,7 @@ export default function App() {
     setLoading(true);
     setError("");
     try {
-      await Promise.all([loadProducts(), loadParties(), loadCurrentStock(), loadHistory(), loadPayments(), loadSummary(), loadSourceSalesReport()]);
+      await Promise.all([loadProducts(), loadParties(), loadCurrentStock(), loadHistory(), loadPayments(), loadSummary(), loadSourceSalesReport(), loadCustomerSalesReport()]);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -254,7 +274,15 @@ export default function App() {
       });
       if (kind === "in") setStockInForm(emptyMovementForm);
       if (kind === "out") setStockOutForm(emptyMovementForm);
-      await Promise.all([loadCurrentStock(), loadHistory(), loadPayments(), loadSummary(), loadSourceSalesReport(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+      await Promise.all([
+        loadCurrentStock(),
+        loadHistory(),
+        loadPayments(),
+        loadSummary(),
+        loadSourceSalesReport(),
+        loadCustomerSalesReport(),
+        selectedPartyId ? loadPartyDetails() : Promise.resolve()
+      ]);
       setSubmitStatus("saved");
       resetSubmitStatus(setSubmitStatus);
     } catch (requestError) {
@@ -376,7 +404,15 @@ export default function App() {
         method: "PATCH",
         body: JSON.stringify(form)
       });
-      await Promise.all([loadParties(), loadHistory(), loadPayments(), loadSummary(), loadSourceSalesReport(), selectedPartyId === partyId ? loadPartyDetails() : Promise.resolve()]);
+      await Promise.all([
+        loadParties(),
+        loadHistory(),
+        loadPayments(),
+        loadSummary(),
+        loadSourceSalesReport(),
+        loadCustomerSalesReport(),
+        selectedPartyId === partyId ? loadPartyDetails() : Promise.resolve()
+      ]);
     } finally {
       setLoading(false);
     }
@@ -423,7 +459,7 @@ export default function App() {
         mode: "Cash",
         note: ""
       });
-      await Promise.all([loadPayments(), loadSummary(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+      await Promise.all([loadPayments(), loadSummary(), loadCustomerSalesReport(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
       setPaymentSubmitStatus("saved");
       resetSubmitStatus(setPaymentSubmitStatus);
     } catch (requestError) {
@@ -480,7 +516,15 @@ export default function App() {
         })
       });
 
-      await Promise.all([loadCurrentStock(), loadHistory(), loadPayments(), loadSummary(), loadSourceSalesReport(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+      await Promise.all([
+        loadCurrentStock(),
+        loadHistory(),
+        loadPayments(),
+        loadSummary(),
+        loadSourceSalesReport(),
+        loadCustomerSalesReport(),
+        selectedPartyId ? loadPartyDetails() : Promise.resolve()
+      ]);
     } finally {
       setLoading(false);
     }
@@ -537,6 +581,35 @@ export default function App() {
 
     try {
       await loadSourceSalesReport(emptyFilters);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function submitCustomerSalesFilters(event) {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      await loadCustomerSalesReport(customerSalesFilters);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function resetCustomerSalesFilters() {
+    const emptyFilters = { customerId: "", from: "", to: "" };
+    setCustomerSalesFilters(emptyFilters);
+    setLoading(true);
+    setError("");
+
+    try {
+      await loadCustomerSalesReport(emptyFilters);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -651,6 +724,17 @@ export default function App() {
             setFilters={setSourceSalesFilters}
             onSearch={submitSourceSalesFilters}
             onReset={resetSourceSalesFilters}
+            loading={loading}
+          />
+        )}
+        {activeTab === "customerReport" && (
+          <CustomerSalesReport
+            parties={parties}
+            report={customerSalesReport}
+            filters={customerSalesFilters}
+            setFilters={setCustomerSalesFilters}
+            onSearch={submitCustomerSalesFilters}
+            onReset={resetCustomerSalesFilters}
             loading={loading}
           />
         )}

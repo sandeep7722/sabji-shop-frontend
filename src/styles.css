@@ -313,6 +313,10 @@ textarea {
   grid-template-columns: repeat(4, minmax(170px, 1fr));
 }
 
+.metric-grid.customer-report-grid {
+  grid-template-columns: repeat(5, minmax(160px, 1fr));
+}
+
 .metric,
 .form-grid,
 .product-list,
@@ -538,6 +542,18 @@ textarea {
 .source-report-filters {
   display: grid;
   grid-template-columns: minmax(240px, 1.2fr) minmax(150px, 0.7fr) minmax(150px, 0.7fr) auto auto;
+  align-items: end;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+
+.customer-report-filters {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.35fr) minmax(150px, 0.7fr) minmax(150px, 0.7fr) auto auto;
   align-items: end;
   gap: 12px;
   background: var(--panel);
@@ -795,6 +811,7 @@ textarea {
   .metric-grid,
   .summary-filter-form,
   .source-report-filters,
+  .customer-report-filters,
   .two-column,
   .adjustment-row,
   .adjustment-row-bottom,
