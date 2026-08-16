@@ -11,7 +11,6 @@ import { Payments } from "./components/Payments.jsx";
 import { Products } from "./components/Products.jsx";
 import { Sidebar } from "./components/Sidebar.jsx";
 import { SourceSalesReport } from "./components/SourceSalesReport.jsx";
-import { Summary } from "./components/Summary.jsx";
 import { Topbar } from "./components/Topbar.jsx";
 import { formatApiError, todayISO } from "./utils/format.js";
 
@@ -76,18 +75,6 @@ export default function App() {
     totals: { sellPackets: 0, sellWeight: 0, sellAmount: 0, paidAmount: 0, balanceAmount: 0 },
     rows: []
   });
-  const [summary, setSummary] = useState({
-    purchaseAmount: 0,
-    saleAmount: 0,
-    paidAmount: 0,
-    receivedAmount: 0,
-    receivableAmount: 0,
-    payableAmount: 0,
-    buyPackets: 0,
-    buyWeight: 0,
-    sellPackets: 0,
-    sellWeight: 0
-  });
   const [partyDetails, setPartyDetails] = useState(null);
   const [selectedPartyId, setSelectedPartyId] = useState("");
   const [loading, setLoading] = useState(false);
@@ -137,11 +124,6 @@ export default function App() {
   const [paymentFilters, setPaymentFilters] = useState({
     partyId: "",
     type: "",
-    from: "",
-    to: ""
-  });
-  const [summaryFilters, setSummaryFilters] = useState({
-    partyId: "",
     from: "",
     to: ""
   });
@@ -221,21 +203,11 @@ export default function App() {
     setCustomerSalesReport(data);
   }
 
-  async function loadSummary(filters = summaryFilters) {
-    const params = new URLSearchParams();
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) params.set(key, value);
-    });
-    const query = params.toString();
-    const data = await api(`/summary${query ? `?${query}` : ""}`);
-    setSummary(data);
-  }
-
   async function refreshAll() {
     setLoading(true);
     setError("");
     try {
-      await Promise.all([loadProducts(), loadParties(), loadCurrentStock(), loadHistory(), loadPayments(), loadSummary(), loadSourceSalesReport(), loadCustomerSalesReport()]);
+      await Promise.all([loadProducts(), loadParties(), loadCurrentStock(), loadHistory(), loadPayments(), loadSourceSalesReport(), loadCustomerSalesReport()]);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -278,7 +250,6 @@ export default function App() {
         loadCurrentStock(),
         loadHistory(),
         loadPayments(),
-        loadSummary(),
         loadSourceSalesReport(),
         loadCustomerSalesReport(),
         selectedPartyId ? loadPartyDetails() : Promise.resolve()
@@ -408,7 +379,6 @@ export default function App() {
         loadParties(),
         loadHistory(),
         loadPayments(),
-        loadSummary(),
         loadSourceSalesReport(),
         loadCustomerSalesReport(),
         selectedPartyId === partyId ? loadPartyDetails() : Promise.resolve()
@@ -459,7 +429,7 @@ export default function App() {
         mode: "Cash",
         note: ""
       });
-      await Promise.all([loadPayments(), loadSummary(), loadCustomerSalesReport(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+      await Promise.all([loadPayments(), loadCustomerSalesReport(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
       setPaymentSubmitStatus("saved");
       resetSubmitStatus(setPaymentSubmitStatus);
     } catch (requestError) {
@@ -535,40 +505,10 @@ export default function App() {
         loadCurrentStock(),
         loadHistory(),
         loadPayments(),
-        loadSummary(),
         loadSourceSalesReport(),
         loadCustomerSalesReport(),
         selectedPartyId ? loadPartyDetails() : Promise.resolve()
       ]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function submitSummaryFilters(event) {
-    event.preventDefault();
-    setLoading(true);
-    setError("");
-
-    try {
-      await loadSummary(summaryFilters);
-    } catch (requestError) {
-      setError(requestError.message);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function resetSummaryFilters() {
-    const emptyFilters = { partyId: "", from: "", to: "" };
-    setSummaryFilters(emptyFilters);
-    setLoading(true);
-    setError("");
-
-    try {
-      await loadSummary(emptyFilters);
-    } catch (requestError) {
-      setError(requestError.message);
     } finally {
       setLoading(false);
     }
@@ -640,17 +580,6 @@ export default function App() {
         <Alerts error={error} notice={notice} />
 
         {activeTab === "current" && <CurrentStock stock={currentStock} loading={loading} />}
-        {activeTab === "summary" && (
-          <Summary
-            parties={parties}
-            summary={summary}
-            filters={summaryFilters}
-            setFilters={setSummaryFilters}
-            onSearch={submitSummaryFilters}
-            onReset={resetSummaryFilters}
-            loading={loading}
-          />
-        )}
         {activeTab === "in" && (
           <section className="content-section">
             <MovementForm
