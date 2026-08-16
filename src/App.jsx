@@ -579,6 +579,7 @@ export default function App() {
               loading={loading}
               submitStatus={stockInSubmitStatus}
               submitError={submitErrors.stockIn}
+              partyFirst
               compact
             />
             <History
@@ -612,6 +613,7 @@ export default function App() {
               loading={loading}
               submitStatus={stockOutSubmitStatus}
               submitError={submitErrors.stockOut}
+              partyFirst
               compact
             />
             <History

@@ -17,34 +17,57 @@ export function MovementForm({
   loading,
   submitStatus = "idle",
   submitError = "",
+  partyFirst = false,
   compact = false
 }) {
   function setField(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
+  const productField = (
+    <SelectField label="Product" value={form.productId} required onChange={(value) => setField("productId", value)}>
+      <option value="">Select product</option>
+      {productOptions.map((product) => (
+        <option key={product.value} value={product.value}>
+          {product.label}
+        </option>
+      ))}
+    </SelectField>
+  );
+
+  const dateField = <InputField label="Date" type="date" value={form.date} required onChange={(value) => setField("date", value)} />;
+
+  const partyField = (
+    <SelectField label={partyLabel} value={form.partyId} onChange={(value) => setField("partyId", value)}>
+      <option value="">Select party</option>
+      {partyOptions.map((party) => (
+        <option key={party.value} value={party.value}>
+          {party.label}
+        </option>
+      ))}
+    </SelectField>
+  );
+
+  const sourcePartyField = sourcePartyLabel ? (
+    <SelectField label={sourcePartyLabel} value={form.sourcePartyId || ""} onChange={(value) => setField("sourcePartyId", value)}>
+      <option value="">Select source</option>
+      {partyOptions.map((party) => (
+        <option key={party.value} value={party.value}>
+          {party.label}
+        </option>
+      ))}
+    </SelectField>
+  ) : null;
+
   return (
     <section className={compact ? "content-section" : "content-section narrow"}>
       <form className={compact ? "form-grid compact-form" : "form-grid"} onSubmit={onSubmit}>
         <h3>{title}</h3>
         <div className={compact ? "compact-form-row compact-form-row-main" : ""}>
-          <SelectField label="Product" value={form.productId} required onChange={(value) => setField("productId", value)}>
-            <option value="">Select product</option>
-            {productOptions.map((product) => (
-              <option key={product.value} value={product.value}>
-                {product.label}
-              </option>
-            ))}
-          </SelectField>
-          <InputField label="Date" type="date" value={form.date} required onChange={(value) => setField("date", value)} />
-          <SelectField label={partyLabel} value={form.partyId} onChange={(value) => setField("partyId", value)}>
-            <option value="">Select party</option>
-            {partyOptions.map((party) => (
-              <option key={party.value} value={party.value}>
-                {party.label}
-              </option>
-            ))}
-          </SelectField>
+          {partyFirst ? partyField : productField}
+          {sourcePartyField || null}
+          {partyFirst ? productField : dateField}
+          {partyFirst ? dateField : partyField}
           <InputField label="Packets" type="number" min="0" step="1" value={form.packets} required onChange={(value) => setField("packets", value)} />
           <InputField
             label="Weight (KG)"
@@ -57,16 +80,6 @@ export function MovementForm({
           />
         </div>
         <div className={compact ? "compact-form-row compact-form-row-money" : "two-column"}>
-          {sourcePartyLabel && (
-            <SelectField label={sourcePartyLabel} value={form.sourcePartyId || ""} onChange={(value) => setField("sourcePartyId", value)}>
-              <option value="">Select source</option>
-              {partyOptions.map((party) => (
-                <option key={party.value} value={party.value}>
-                  {party.label}
-                </option>
-              ))}
-            </SelectField>
-          )}
           <InputField
             label="Total Amount"
             type="number"
