@@ -63,6 +63,7 @@ function calculateHistorySummary(history) {
         result.buyAmount += amount;
         result.buyPackets += movement.packets || 0;
         result.buyWeight += movement.weight || 0;
+        result.buyEntries += 1;
         result.paidAmount += paymentAmount;
         if (partyBalance) partyBalance.balance -= amount - paymentAmount;
       }
@@ -71,16 +72,19 @@ function calculateHistorySummary(history) {
         result.sellAmount += amount;
         result.sellPackets += movement.packets || 0;
         result.sellWeight += movement.weight || 0;
+        result.sellEntries += 1;
         result.receivedAmount += paymentAmount;
         if (partyBalance) partyBalance.balance += amount - paymentAmount;
       }
 
       if (movement.type === "PAYMENT_PAID") {
+        result.paidPaymentEntries += 1;
         result.paidAmount += paymentAmount;
         if (partyBalance) partyBalance.balance += paymentAmount;
       }
 
       if (movement.type === "PAYMENT_RECEIVED") {
+        result.paymentEntries += 1;
         result.receivedAmount += paymentAmount;
         if (partyBalance) partyBalance.balance -= paymentAmount;
       }
@@ -103,6 +107,10 @@ function calculateHistorySummary(history) {
       buyWeight: 0,
       sellPackets: 0,
       sellWeight: 0,
+      buyEntries: 0,
+      sellEntries: 0,
+      paidPaymentEntries: 0,
+      paymentEntries: 0,
       partyBalances: new Map()
     }
   );
@@ -135,7 +143,9 @@ export function History({
   loading,
   collapsible = false,
   defaultCollapsed = false,
-  showSummary = false
+  showSummary = false,
+  showBuySummary = false,
+  showSellSummary = false
 }) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [isSummaryCollapsed, setIsSummaryCollapsed] = useState(true);
@@ -197,19 +207,19 @@ export function History({
 
       {(!collapsible || !isCollapsed) && (
         <form className="filters" onSubmit={onSubmit}>
-          <SelectField label="Product" value={filters.productId} onChange={(value) => setField("productId", value)}>
-            <option value="">All products</option>
-            {products.map((product) => (
-              <option key={product._id} value={product._id}>
-                {product.name}
-              </option>
-            ))}
-          </SelectField>
           <SelectField label="Party" value={filters.partyId} onChange={(value) => setField("partyId", value)}>
             <option value="">All parties</option>
             {parties.map((party) => (
               <option key={party._id} value={party._id}>
                 {party.partyCode} - {party.name}
+              </option>
+            ))}
+          </SelectField>
+          <SelectField label="Product" value={filters.productId} onChange={(value) => setField("productId", value)}>
+            <option value="">All products</option>
+            {products.map((product) => (
+              <option key={product._id} value={product._id}>
+                {product.name}
               </option>
             ))}
           </SelectField>
@@ -235,17 +245,75 @@ export function History({
         </form>
       )}
 
-      {showSummary && (
+      {(showSummary || showBuySummary || showSellSummary) && (
         <>
           <button className="filter-toggle" type="button" onClick={() => setIsSummaryCollapsed((current) => !current)}>
             <span>
               <SlidersHorizontal size={17} />
-              History Summary
+              {showBuySummary ? "Buy Summary" : showSellSummary ? "Sell Summary" : "History Summary"}
             </span>
             {isSummaryCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
           </button>
 
-          {!isSummaryCollapsed && (
+          {!isSummaryCollapsed && showBuySummary && (
+            <div className="metric-grid history-summary-grid">
+              <div className="metric">
+                <span>Total Buy</span>
+                <strong>{formatMoney(historySummary.buyAmount)}</strong>
+              </div>
+              <div className="metric">
+                <span>Total Paid</span>
+                <strong className="negative">{formatMoney(historySummary.paidAmount)}</strong>
+              </div>
+              <div className="metric">
+                <span>Remaining Payable</span>
+                <strong className={historySummary.payableAmount > 0 ? "negative" : "positive"}>{formatMoney(historySummary.payableAmount)}</strong>
+              </div>
+              <div className="metric">
+                <span>Buy Packets</span>
+                <strong>{historySummary.buyPackets || 0}</strong>
+              </div>
+              <div className="metric">
+                <span>Buy KG</span>
+                <strong>{historySummary.buyWeight || 0} KG</strong>
+              </div>
+              <div className="metric">
+                <span>Buy / Payment Rows</span>
+                <strong>{historySummary.buyEntries} / {historySummary.paidPaymentEntries}</strong>
+              </div>
+            </div>
+          )}
+
+          {!isSummaryCollapsed && showSellSummary && (
+            <div className="metric-grid history-summary-grid">
+              <div className="metric">
+                <span>Total Sell</span>
+                <strong>{formatMoney(historySummary.sellAmount)}</strong>
+              </div>
+              <div className="metric">
+                <span>Total Received</span>
+                <strong className="positive">{formatMoney(historySummary.receivedAmount)}</strong>
+              </div>
+              <div className="metric">
+                <span>Remaining Amount</span>
+                <strong className={historySummary.receivableAmount > 0 ? "negative" : "positive"}>{formatMoney(historySummary.receivableAmount)}</strong>
+              </div>
+              <div className="metric">
+                <span>Sell Packets</span>
+                <strong>{historySummary.sellPackets || 0}</strong>
+              </div>
+              <div className="metric">
+                <span>Sell KG</span>
+                <strong>{historySummary.sellWeight || 0} KG</strong>
+              </div>
+              <div className="metric">
+                <span>Sell / Payment Rows</span>
+                <strong>{historySummary.sellEntries} / {historySummary.paymentEntries}</strong>
+              </div>
+            </div>
+          )}
+
+          {!isSummaryCollapsed && showSummary && !showBuySummary && !showSellSummary && (
             <div className="metric-grid history-summary-grid">
               <div className="metric">
                 <span>Total Buy</span>

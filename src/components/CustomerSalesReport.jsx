@@ -28,6 +28,10 @@ export function CustomerSalesReport({ parties, report, filters, setFilters, onSe
     onReset();
   }
 
+  function isPaymentOnly(row) {
+    return row.entryType === "PAYMENT" || row.type === "PAYMENT_RECEIVED";
+  }
+
   return (
     <section className="content-section">
       <form className="customer-report-filters" onSubmit={onSearch}>
@@ -93,20 +97,21 @@ export function CustomerSalesReport({ parties, report, filters, setFilters, onSe
           </thead>
           <tbody>
             {report.rows.map((movement) => {
-              const rowBalance = Math.max(0, (movement.totalAmount || 0) - (movement.paymentAmount || 0));
+              const paymentOnly = isPaymentOnly(movement);
+              const rowBalance = paymentOnly ? 0 : Math.max(0, (movement.totalAmount || 0) - (movement.paymentAmount || 0));
 
               return (
                 <tr key={movement._id}>
                   <td>{formatDate(movement.date)}</td>
                   <td>{movement.partyId ? `${movement.partyId.partyCode} - ${movement.partyId.name}` : "-"}</td>
                   <td>{movement.sourcePartyId ? `${movement.sourcePartyId.partyCode} - ${movement.sourcePartyId.name}` : "-"}</td>
-                  <td>{movement.productId?.name || "-"}</td>
-                  <td>{movement.packets}</td>
-                  <td>{movement.weight} KG</td>
-                  <td>{formatMoney(movement.totalAmount)}</td>
+                  <td>{paymentOnly ? "Manual Payment" : movement.productId?.name || "-"}</td>
+                  <td>{paymentOnly ? "-" : movement.packets}</td>
+                  <td>{paymentOnly ? "-" : `${movement.weight} KG`}</td>
+                  <td>{paymentOnly ? "-" : formatMoney(movement.totalAmount)}</td>
                   <td className="positive">{movement.paymentAmount ? formatMoney(movement.paymentAmount) : "-"}</td>
-                  <td className={rowBalance > 0 ? "negative" : "positive"}>{formatMoney(rowBalance)}</td>
-                  <td>{movement.note || "-"}</td>
+                  <td className={rowBalance > 0 ? "negative" : "positive"}>{paymentOnly ? "-" : formatMoney(rowBalance)}</td>
+                  <td>{[movement.note, paymentOnly && movement.paymentMode ? movement.paymentMode : ""].filter(Boolean).join(" / ") || "-"}</td>
                 </tr>
               );
             })}

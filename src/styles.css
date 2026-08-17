@@ -232,6 +232,17 @@ textarea {
   flex-wrap: wrap;
 }
 
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.form-actions .submit-row {
+  display: contents;
+}
+
 .submit-error {
   display: inline-flex;
   align-items: center;
@@ -443,6 +454,10 @@ tr:last-child td {
   padding: 0 12px;
 }
 
+.compact-form .form-actions {
+  gap: 8px;
+}
+
 .compact-form .field {
   gap: 4px;
 }
@@ -491,6 +506,7 @@ tr:last-child td {
   min-height: 38px;
 }
 
+.adjustment-form .form-actions,
 .adjustment-form .submit-row {
   justify-content: flex-start;
 }
@@ -604,6 +620,7 @@ textarea {
   align-items: end;
 }
 
+.payment-add-form .form-actions,
 .payment-add-form .submit-row {
   grid-column: 1 / -1;
 }
@@ -643,6 +660,45 @@ textarea {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.table-search {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: var(--shadow);
+}
+
+.search-input-wrap {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 0 11px;
+}
+
+.search-input-wrap svg {
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+
+.search-input-wrap input {
+  min-height: 40px;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.search-input-wrap input:focus {
+  box-shadow: none;
 }
 
 .payment-search-form {
@@ -831,6 +887,7 @@ textarea {
   .party-add-form,
   .payment-add-form,
   .payment-search-form,
+  .table-search,
   .product-edit-form,
   .party-edit-form,
   .history-edit-form,

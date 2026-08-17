@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CalendarSearch, ChevronDown, ChevronUp, Plus, SlidersHorizontal } from "lucide-react";
+import { CalendarSearch, ChevronDown, ChevronUp, Plus, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { formatDate, formatMoney } from "../utils/format.js";
 import { InputField, SelectField } from "./FormFields.jsx";
 import { SubmitButton } from "./SubmitButton.jsx";
@@ -12,12 +12,15 @@ export function Payments({
   paymentForm,
   setPaymentForm,
   onCreatePayment,
+  onResetPaymentForm,
   onSearchPayments,
+  onResetPaymentFilters,
   loading,
   paymentSubmitStatus = "idle",
   submitError = ""
 }) {
   const [isAddPaymentOpen, setIsAddPaymentOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   function setPaymentField(field, value) {
     setPaymentForm((current) => ({ ...current, [field]: value }));
@@ -64,35 +67,55 @@ export function Payments({
             <span>Note</span>
             <input value={paymentForm.note} placeholder="Advance / old balance / partial payment" onChange={(event) => setPaymentField("note", event.target.value)} />
           </label>
-          <SubmitButton status={paymentSubmitStatus} idleLabel="Save Payment" disabled={loading && paymentSubmitStatus !== "saving"} errorText={submitError} />
+          <div className="form-actions">
+            <SubmitButton status={paymentSubmitStatus} idleLabel="Save Payment" disabled={loading && paymentSubmitStatus !== "saving"} errorText={submitError} />
+            {onResetPaymentForm && (
+              <button className="icon-button text-button" type="button" disabled={loading || paymentSubmitStatus === "saving"} onClick={onResetPaymentForm}>
+                <RotateCcw size={17} />
+                <span>Reset</span>
+              </button>
+            )}
+          </div>
         </form>
       )}
 
-      <form className="payment-search-form" onSubmit={onSearchPayments}>
-        <span className="payment-search-title">
+      <button className="filter-toggle" type="button" onClick={() => setIsFilterOpen((current) => !current)}>
+        <span>
           <SlidersHorizontal size={17} />
           Search Payments
         </span>
-        <SelectField label="Party" value={filters.partyId} onChange={(value) => setFilterField("partyId", value)}>
-          <option value="">All parties</option>
-          {parties.map((party) => (
-            <option key={party._id} value={party._id}>
-              {party.partyCode} - {party.name}
-            </option>
-          ))}
-        </SelectField>
-        <SelectField label="Type" value={filters.type} onChange={(value) => setFilterField("type", value)}>
-          <option value="">All types</option>
-          <option value="RECEIVED">Received</option>
-          <option value="PAID">Paid</option>
-        </SelectField>
-        <InputField label="From" type="date" value={filters.from} onChange={(value) => setFilterField("from", value)} />
-        <InputField label="To" type="date" value={filters.to} onChange={(value) => setFilterField("to", value)} />
-        <button className="primary-button search-button" type="submit" disabled={loading}>
-          <CalendarSearch size={17} />
-          <span>Search</span>
-        </button>
-      </form>
+        {isFilterOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+      </button>
+
+      {isFilterOpen && (
+        <form className="payment-search-form" onSubmit={onSearchPayments}>
+          <SelectField label="Party" value={filters.partyId} onChange={(value) => setFilterField("partyId", value)}>
+            <option value="">All parties</option>
+            {parties.map((party) => (
+              <option key={party._id} value={party._id}>
+                {party.partyCode} - {party.name}
+              </option>
+            ))}
+          </SelectField>
+          <SelectField label="Type" value={filters.type} onChange={(value) => setFilterField("type", value)}>
+            <option value="">All types</option>
+            <option value="RECEIVED">Received</option>
+            <option value="PAID">Paid</option>
+          </SelectField>
+          <InputField label="From" type="date" value={filters.from} onChange={(value) => setFilterField("from", value)} />
+          <InputField label="To" type="date" value={filters.to} onChange={(value) => setFilterField("to", value)} />
+          <button className="primary-button search-button" type="submit" disabled={loading}>
+            <CalendarSearch size={17} />
+            <span>Search</span>
+          </button>
+          {onResetPaymentFilters && (
+            <button className="icon-button text-button" type="button" disabled={loading} onClick={onResetPaymentFilters}>
+              <RotateCcw size={17} />
+              <span>Reset</span>
+            </button>
+          )}
+        </form>
+      )}
 
       <div className="table-wrap">
         <table>

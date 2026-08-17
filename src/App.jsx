@@ -460,6 +460,71 @@ export default function App() {
     }
   }
 
+  async function resetPaymentFilters() {
+    const emptyFilters = { partyId: "", type: "", from: "", to: "" };
+    setPaymentFilters(emptyFilters);
+    setLoading(true);
+    setError("");
+
+    try {
+      await loadPayments(emptyFilters);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function resetStockInForm() {
+    setStockInForm({ ...emptyMovementForm });
+    setStockInSubmitStatus("idle");
+    clearSubmitError(setSubmitErrors, "stockIn");
+  }
+
+  function resetStockOutForm() {
+    setStockOutForm({ ...emptyMovementForm });
+    setStockOutSubmitStatus("idle");
+    clearSubmitError(setSubmitErrors, "stockOut");
+  }
+
+  function resetAdjustmentForm() {
+    setAdjustmentForm({ ...emptyAdjustmentForm });
+    setAdjustmentSubmitStatus("idle");
+    clearSubmitError(setSubmitErrors, "adjustment");
+  }
+
+  function resetPaymentForm() {
+    setPaymentForm({
+      partyId: "",
+      type: "RECEIVED",
+      date: todayISO(),
+      amount: "",
+      mode: "Cash",
+      note: ""
+    });
+    setPaymentSubmitStatus("idle");
+    clearSubmitError(setSubmitErrors, "payment");
+  }
+
+  function resetPartyForm() {
+    setPartyForm({
+      partyCode: "",
+      name: "",
+      type: "BOTH",
+      phone: "",
+      address: "",
+      note: ""
+    });
+    setPartySubmitStatus("idle");
+    clearSubmitError(setSubmitErrors, "party");
+  }
+
+  function resetProductForm() {
+    setProductName("");
+    setProductSubmitStatus("idle");
+    clearSubmitError(setSubmitErrors, "product");
+  }
+
   async function submitHistoryFilters(event) {
     event.preventDefault();
     setLoading(true);
@@ -596,6 +661,7 @@ export default function App() {
               productOptions={productOptions}
               partyOptions={partyOptions}
               onSubmit={(event) => submitMovement(event, "in")}
+              onReset={resetStockInForm}
               partyLabel="Dealer / Party"
               paymentLabel="Paid Now"
               notePlaceholder="Fresh onion stock"
@@ -617,6 +683,7 @@ export default function App() {
               loading={loading}
               collapsible
               defaultCollapsed
+              showBuySummary
             />
           </section>
         )}
@@ -630,6 +697,7 @@ export default function App() {
               productOptions={productOptions}
               partyOptions={partyOptions}
               onSubmit={(event) => submitMovement(event, "out")}
+              onReset={resetStockOutForm}
               partyLabel="Buyer / Party"
               sourcePartyLabel="Bought From Party (Optional)"
               paymentLabel="Received Now"
@@ -643,7 +711,7 @@ export default function App() {
             <History
               products={products}
               parties={parties}
-              history={history.filter((movement) => movement.type === "OUT" || movement.type === "PAYMENT_RECEIVED")}
+              history={history.filter((movement) => movement.type === "OUT")}
               filters={historyFilters}
               setFilters={setHistoryFilters}
               onSubmit={submitHistoryFilters}
@@ -652,6 +720,7 @@ export default function App() {
               loading={loading}
               collapsible
               defaultCollapsed
+              showSellSummary
             />
           </section>
         )}
@@ -698,6 +767,7 @@ export default function App() {
             partyForm={partyForm}
             setPartyForm={setPartyForm}
             onCreateParty={submitParty}
+            onResetPartyForm={resetPartyForm}
             onUpdateParty={updateParty}
             loading={loading}
             partySubmitStatus={partySubmitStatus}
@@ -713,7 +783,9 @@ export default function App() {
             paymentForm={paymentForm}
             setPaymentForm={setPaymentForm}
             onCreatePayment={submitPayment}
+            onResetPaymentForm={resetPaymentForm}
             onSearchPayments={submitPaymentFilters}
+            onResetPaymentFilters={resetPaymentFilters}
             loading={loading}
             paymentSubmitStatus={paymentSubmitStatus}
             submitError={submitErrors.payment}
@@ -725,6 +797,7 @@ export default function App() {
             setForm={setAdjustmentForm}
             productOptions={productOptions}
             onSubmit={submitAdjustment}
+            onReset={resetAdjustmentForm}
             loading={loading}
             adjustmentSubmitStatus={adjustmentSubmitStatus}
             submitError={submitErrors.adjustment}
@@ -736,6 +809,7 @@ export default function App() {
             name={productName}
             setName={setProductName}
             onSubmit={submitProduct}
+            onResetProductForm={resetProductForm}
             onRename={renameProduct}
             loading={loading}
             productSubmitStatus={productSubmitStatus}

@@ -1,4 +1,5 @@
 import React from "react";
+import { RotateCcw } from "lucide-react";
 import { InputField, SelectField } from "./FormFields.jsx";
 import { SubmitButton } from "./SubmitButton.jsx";
 
@@ -10,6 +11,7 @@ export function MovementForm({
   productOptions,
   partyOptions,
   onSubmit,
+  onReset,
   partyLabel,
   sourcePartyLabel = "",
   paymentLabel,
@@ -118,7 +120,15 @@ export function MovementForm({
             <textarea value={form.note} placeholder={notePlaceholder} onChange={(event) => setField("note", event.target.value)} />
           </label>
         )}
-        <SubmitButton status={submitStatus} idleLabel={submitLabel} disabled={loading && submitStatus !== "saving"} errorText={submitError} />
+        <div className="form-actions">
+          <SubmitButton status={submitStatus} idleLabel={submitLabel} disabled={loading && submitStatus !== "saving"} errorText={submitError} />
+          {onReset && (
+            <button className="icon-button text-button" type="button" disabled={loading || submitStatus === "saving"} onClick={onReset}>
+              <RotateCcw size={17} />
+              <span>Reset</span>
+            </button>
+          )}
+        </div>
       </form>
     </section>
   );

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Pencil, X } from "lucide-react";
+import { Pencil, RotateCcw, Search, X } from "lucide-react";
 import { InputField, SelectField } from "./FormFields.jsx";
 import { SubmitButton } from "./SubmitButton.jsx";
 
@@ -15,11 +15,21 @@ function createEditForm(party) {
   };
 }
 
-export function Parties({ parties, partyForm, setPartyForm, onCreateParty, onUpdateParty, loading, partySubmitStatus = "idle", submitError = "" }) {
+export function Parties({ parties, partyForm, setPartyForm, onCreateParty, onResetPartyForm, onUpdateParty, loading, partySubmitStatus = "idle", submitError = "" }) {
   const [editingPartyId, setEditingPartyId] = useState("");
   const [editForm, setEditForm] = useState(null);
   const [editStatus, setEditStatus] = useState("idle");
   const [editError, setEditError] = useState("");
+  const [searchText, setSearchText] = useState("");
+
+  const normalizedSearch = searchText.trim().toLowerCase();
+  const filteredParties = normalizedSearch
+    ? parties.filter((party) =>
+        [party.partyCode, party.name, party.type, party.phone, party.address, party.note, party.isActive ? "active" : "inactive"]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(normalizedSearch))
+      )
+    : parties;
 
   function setField(field, value) {
     setPartyForm((current) => ({ ...current, [field]: value }));
@@ -71,8 +81,32 @@ export function Parties({ parties, partyForm, setPartyForm, onCreateParty, onUpd
         <InputField label="Name" value={partyForm.name} required placeholder="Ram Traders" onChange={(value) => setField("name", value)} />
         <InputField label="Phone" value={partyForm.phone} placeholder="9876543210" onChange={(value) => setField("phone", value)} />
         <InputField label="Address" value={partyForm.address} placeholder="Market road" onChange={(value) => setField("address", value)} />
-        <SubmitButton status={partySubmitStatus} idleLabel="Add Party" disabled={loading && partySubmitStatus !== "saving"} errorText={submitError} />
+        <div className="form-actions">
+          <SubmitButton status={partySubmitStatus} idleLabel="Add Party" disabled={loading && partySubmitStatus !== "saving"} errorText={submitError} />
+          {onResetPartyForm && (
+            <button className="icon-button text-button" type="button" disabled={loading || partySubmitStatus === "saving"} onClick={onResetPartyForm}>
+              <RotateCcw size={17} />
+              <span>Reset</span>
+            </button>
+          )}
+        </div>
       </form>
+
+      <div className="table-search">
+        <label className="field">
+          <span>Search Dealer / Customer</span>
+          <div className="search-input-wrap">
+            <Search size={17} />
+            <input value={searchText} placeholder="Search by ID, name, phone, type, address" onChange={(event) => setSearchText(event.target.value)} />
+          </div>
+        </label>
+        {searchText && (
+          <button className="icon-button text-button" type="button" onClick={() => setSearchText("")}>
+            <RotateCcw size={17} />
+            <span>Reset</span>
+          </button>
+        )}
+      </div>
 
       <div className="table-wrap">
         <table>
@@ -89,7 +123,7 @@ export function Parties({ parties, partyForm, setPartyForm, onCreateParty, onUpd
             </tr>
           </thead>
           <tbody>
-            {parties.map((party) =>
+            {filteredParties.map((party) =>
               editingPartyId === party._id && editForm ? (
                 <tr key={party._id}>
                   <td colSpan="8">
@@ -134,9 +168,9 @@ export function Parties({ parties, partyForm, setPartyForm, onCreateParty, onUpd
                 </tr>
               )
             )}
-            {!parties.length && (
+            {!filteredParties.length && (
               <tr>
-                <td colSpan="8">No parties found.</td>
+                <td colSpan="8">{parties.length ? "No matching dealer/customer found." : "No parties found."}</td>
               </tr>
             )}
           </tbody>

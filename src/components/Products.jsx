@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Pencil, X } from "lucide-react";
+import { Pencil, RotateCcw, X } from "lucide-react";
 import { InputField } from "./FormFields.jsx";
 import { SubmitButton } from "./SubmitButton.jsx";
 
-export function Products({ products, name, setName, onSubmit, onRename, loading, productSubmitStatus = "idle", submitError = "" }) {
+export function Products({ products, name, setName, onSubmit, onResetProductForm, onRename, loading, productSubmitStatus = "idle", submitError = "" }) {
   const [editingProductId, setEditingProductId] = useState("");
   const [draftName, setDraftName] = useState("");
   const [renameStatus, setRenameStatus] = useState("idle");
@@ -43,7 +43,15 @@ export function Products({ products, name, setName, onSubmit, onRename, loading,
       <form className="form-grid" onSubmit={onSubmit}>
         <h3>Create Product</h3>
         <InputField label="Product Name" value={name} required placeholder="Tomato" onChange={setName} />
-        <SubmitButton status={productSubmitStatus} idleLabel="Add Product" disabled={loading && productSubmitStatus !== "saving"} errorText={submitError} />
+        <div className="form-actions">
+          <SubmitButton status={productSubmitStatus} idleLabel="Add Product" disabled={loading && productSubmitStatus !== "saving"} errorText={submitError} />
+          {onResetProductForm && (
+            <button className="icon-button text-button" type="button" disabled={loading || productSubmitStatus === "saving"} onClick={onResetProductForm}>
+              <RotateCcw size={17} />
+              <span>Reset</span>
+            </button>
+          )}
+        </div>
       </form>
 
       <div className="product-list">

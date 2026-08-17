@@ -1,8 +1,9 @@
 import React from "react";
+import { RotateCcw } from "lucide-react";
 import { InputField, SelectField } from "./FormFields.jsx";
 import { SubmitButton } from "./SubmitButton.jsx";
 
-export function AdjustmentForm({ form, setForm, productOptions, onSubmit, loading, adjustmentSubmitStatus = "idle", submitError = "" }) {
+export function AdjustmentForm({ form, setForm, productOptions, onSubmit, onReset, loading, adjustmentSubmitStatus = "idle", submitError = "" }) {
   function setField(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
   }
@@ -41,7 +42,15 @@ export function AdjustmentForm({ form, setForm, productOptions, onSubmit, loadin
             <input value={form.note} placeholder="Rotten onions" onChange={(event) => setField("note", event.target.value)} />
           </label>
         </div>
-        <SubmitButton status={adjustmentSubmitStatus} idleLabel="Save Adjustment" disabled={loading && adjustmentSubmitStatus !== "saving"} errorText={submitError} />
+        <div className="form-actions">
+          <SubmitButton status={adjustmentSubmitStatus} idleLabel="Save Adjustment" disabled={loading && adjustmentSubmitStatus !== "saving"} errorText={submitError} />
+          {onReset && (
+            <button className="icon-button text-button" type="button" disabled={loading || adjustmentSubmitStatus === "saving"} onClick={onReset}>
+              <RotateCcw size={17} />
+              <span>Reset</span>
+            </button>
+          )}
+        </div>
       </form>
     </section>
   );
