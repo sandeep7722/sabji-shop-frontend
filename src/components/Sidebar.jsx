@@ -14,8 +14,8 @@ import {
 
 export const tabs = [
   { id: "current", label: "Current Stock", icon: Boxes },
-  { id: "in", label: "Stock IN", icon: ArrowDownToLine },
-  { id: "out", label: "Stock OUT", icon: ArrowUpFromLine },
+  { id: "in", label: "Buy", icon: ArrowDownToLine },
+  { id: "out", label: "Sell", icon: ArrowUpFromLine },
   { id: "history", label: "History", icon: ClipboardList },
   { id: "sourceReport", label: "Dealer Buy-Sell Report", icon: Route },
   { id: "customerReport", label: "Customer Sell Report", icon: ShoppingBag },
