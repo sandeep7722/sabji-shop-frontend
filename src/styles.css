@@ -712,6 +712,7 @@ textarea {
 
 .type-badge.in,
 .type-badge.adjustment-in,
+.type-badge.payment-received,
 .type-badge.received {
   background: #e7f6ed;
   color: var(--success);
@@ -719,6 +720,7 @@ textarea {
 
 .type-badge.out,
 .type-badge.adjustment-out,
+.type-badge.payment-paid,
 .type-badge.paid {
   background: #fff0e7;
   color: var(--accent);

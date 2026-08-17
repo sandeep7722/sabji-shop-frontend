@@ -429,7 +429,13 @@ export default function App() {
         mode: "Cash",
         note: ""
       });
-      await Promise.all([loadPayments(), loadCustomerSalesReport(), selectedPartyId ? loadPartyDetails() : Promise.resolve()]);
+      await Promise.all([
+        loadPayments(),
+        loadHistory(),
+        loadSourceSalesReport(),
+        loadCustomerSalesReport(),
+        selectedPartyId ? loadPartyDetails() : Promise.resolve()
+      ]);
       setPaymentSubmitStatus("saved");
       resetSubmitStatus(setPaymentSubmitStatus);
     } catch (requestError) {
@@ -602,7 +608,7 @@ export default function App() {
             <History
               products={products}
               parties={parties}
-              history={history.filter((movement) => movement.type === "IN")}
+              history={history.filter((movement) => movement.type === "IN" || movement.type === "PAYMENT_PAID")}
               filters={historyFilters}
               setFilters={setHistoryFilters}
               onSubmit={submitHistoryFilters}
@@ -637,7 +643,7 @@ export default function App() {
             <History
               products={products}
               parties={parties}
-              history={history.filter((movement) => movement.type === "OUT")}
+              history={history.filter((movement) => movement.type === "OUT" || movement.type === "PAYMENT_RECEIVED")}
               filters={historyFilters}
               setFilters={setHistoryFilters}
               onSubmit={submitHistoryFilters}

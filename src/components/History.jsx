@@ -25,16 +25,36 @@ function createEditForm(movement) {
   };
 }
 
+function isPaymentOnly(movement) {
+  return movement.entryType === "PAYMENT" || movement.type === "PAYMENT_PAID" || movement.type === "PAYMENT_RECEIVED";
+}
+
+function partyLabel(movement) {
+  if (movement.partyId && typeof movement.partyId === "object") {
+    return `${movement.partyId.partyCode} - ${movement.partyId.name}`;
+  }
+
+  return movement.partyName || movement.reason || "Unknown party";
+}
+
+function typeLabel(type) {
+  return type.replace(/_/g, " ");
+}
+
+function typeClass(type) {
+  return type.toLowerCase().replace(/_/g, "-");
+}
+
 function calculateHistorySummary(history) {
   const summary = history.reduce(
     (result, movement) => {
       const amount = Number(movement.totalAmount || 0);
       const paymentAmount = Number(movement.paymentAmount || 0);
       const partyId = movement.partyId?._id || movement.partyId || "";
-      const partyName = movement.partyId ? `${movement.partyId.partyCode} - ${movement.partyId.name}` : movement.partyName || "Unknown party";
+      const currentPartyLabel = partyLabel(movement);
 
       if (partyId && !result.partyBalances.has(partyId)) {
-        result.partyBalances.set(partyId, { partyName, balance: 0 });
+        result.partyBalances.set(partyId, { partyName: currentPartyLabel, balance: 0 });
       }
 
       const partyBalance = partyId ? result.partyBalances.get(partyId) : null;
@@ -44,7 +64,6 @@ function calculateHistorySummary(history) {
         result.buyPackets += movement.packets || 0;
         result.buyWeight += movement.weight || 0;
         result.paidAmount += paymentAmount;
-        result.payableAmount += Math.max(0, amount - paymentAmount);
         if (partyBalance) partyBalance.balance -= amount - paymentAmount;
       }
 
@@ -53,8 +72,17 @@ function calculateHistorySummary(history) {
         result.sellPackets += movement.packets || 0;
         result.sellWeight += movement.weight || 0;
         result.receivedAmount += paymentAmount;
-        result.receivableAmount += Math.max(0, amount - paymentAmount);
         if (partyBalance) partyBalance.balance += amount - paymentAmount;
+      }
+
+      if (movement.type === "PAYMENT_PAID") {
+        result.paidAmount += paymentAmount;
+        if (partyBalance) partyBalance.balance += paymentAmount;
+      }
+
+      if (movement.type === "PAYMENT_RECEIVED") {
+        result.receivedAmount += paymentAmount;
+        if (partyBalance) partyBalance.balance -= paymentAmount;
       }
 
       if (movement.type === "IN" || movement.type === "OUT") {
@@ -79,6 +107,14 @@ function calculateHistorySummary(history) {
     }
   );
 
+  summary.payableAmount = Array.from(summary.partyBalances.values()).reduce(
+    (total, party) => total + (party.balance < 0 ? Math.abs(party.balance) : 0),
+    0
+  );
+  summary.receivableAmount = Array.from(summary.partyBalances.values()).reduce(
+    (total, party) => total + (party.balance > 0 ? party.balance : 0),
+    0
+  );
   summary.suggestions = Array.from(summary.partyBalances.values())
     .filter((party) => party.balance !== 0)
     .sort((first, second) => Math.abs(second.balance) - Math.abs(first.balance))
@@ -355,23 +391,27 @@ export function History({
               ) : (
                 <tr className={movement.isEdited ? "edited-row" : ""} key={movement._id}>
                   <td>{formatDate(movement.date)}</td>
-                  <td>{movement.productId?.name || "-"}</td>
+                  <td>{isPaymentOnly(movement) ? "-" : movement.productId?.name || "-"}</td>
                   <td>
-                    <span className={`type-badge ${movement.type.toLowerCase().replace("_", "-")}`}>{movement.type.replace("_", " ")}</span>
+                    <span className={`type-badge ${typeClass(movement.type)}`}>{typeLabel(movement.type)}</span>
                   </td>
-                  <td>{movement.partyId ? `${movement.partyId.partyCode} - ${movement.partyId.name}` : movement.partyName || movement.reason || "-"}</td>
+                  <td>{partyLabel(movement)}</td>
                   <td>{movement.sourcePartyId ? `${movement.sourcePartyId.partyCode} - ${movement.sourcePartyId.name}` : "-"}</td>
-                  <td className={signedClass(movement.signedPackets)}>{movement.signedPackets}</td>
-                  <td className={signedClass(movement.signedWeight)}>{movement.signedWeight} KG</td>
-                  <td>{formatMoney(movement.totalAmount)}</td>
+                  <td className={isPaymentOnly(movement) ? "" : signedClass(movement.signedPackets)}>{isPaymentOnly(movement) ? "-" : movement.signedPackets}</td>
+                  <td className={isPaymentOnly(movement) ? "" : signedClass(movement.signedWeight)}>{isPaymentOnly(movement) ? "-" : `${movement.signedWeight} KG`}</td>
+                  <td>{isPaymentOnly(movement) ? "-" : formatMoney(movement.totalAmount)}</td>
                   <td className={movement.paymentType === "RECEIVED" ? "positive" : movement.paymentType === "PAID" ? "negative" : ""}>
                     {movement.paymentAmount ? `${movement.paymentType} ${formatMoney(movement.paymentAmount)}` : "-"}
                   </td>
-                  <td>{movement.note || "-"}</td>
+                  <td>{[movement.note, isPaymentOnly(movement) && movement.paymentMode ? movement.paymentMode : ""].filter(Boolean).join(" / ") || "-"}</td>
                   <td>
-                    <button className="icon-only-button" type="button" title="Edit history entry" disabled={loading || !onUpdateMovement} onClick={() => startEdit(movement)}>
-                      <Pencil size={16} />
-                    </button>
+                    {isPaymentOnly(movement) ? (
+                      "-"
+                    ) : (
+                      <button className="icon-only-button" type="button" title="Edit history entry" disabled={loading || !onUpdateMovement} onClick={() => startEdit(movement)}>
+                        <Pencil size={16} />
+                      </button>
+                    )}
                   </td>
                 </tr>
               )
