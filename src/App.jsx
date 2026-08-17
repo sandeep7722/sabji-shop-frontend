@@ -538,6 +538,22 @@ export default function App() {
     }
   }
 
+  async function submitHistoryFiltersWithoutType(event) {
+    event.preventDefault();
+    const filtersWithoutType = { ...historyFilters, type: "" };
+    setHistoryFilters(filtersWithoutType);
+    setLoading(true);
+    setError("");
+
+    try {
+      await loadHistory(filtersWithoutType);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function resetHistoryFilters() {
     const emptyFilters = { productId: "", partyId: "", type: "", from: "", to: "" };
     setHistoryFilters(emptyFilters);
@@ -674,15 +690,16 @@ export default function App() {
             <History
               products={products}
               parties={parties}
-              history={history.filter((movement) => movement.type === "IN" || movement.type === "PAYMENT_PAID")}
-              filters={historyFilters}
+              history={history.filter((movement) => movement.type === "IN")}
+              filters={{ ...historyFilters, type: "" }}
               setFilters={setHistoryFilters}
-              onSubmit={submitHistoryFilters}
+              onSubmit={submitHistoryFiltersWithoutType}
               onReset={resetHistoryFilters}
               onUpdateMovement={updateMovement}
               loading={loading}
               collapsible
               defaultCollapsed
+              hideTypeFilter
               showBuySummary
             />
           </section>
@@ -712,14 +729,15 @@ export default function App() {
               products={products}
               parties={parties}
               history={history.filter((movement) => movement.type === "OUT")}
-              filters={historyFilters}
+              filters={{ ...historyFilters, type: "" }}
               setFilters={setHistoryFilters}
-              onSubmit={submitHistoryFilters}
+              onSubmit={submitHistoryFiltersWithoutType}
               onReset={resetHistoryFilters}
               onUpdateMovement={updateMovement}
               loading={loading}
               collapsible
               defaultCollapsed
+              hideTypeFilter
               showSellSummary
             />
           </section>

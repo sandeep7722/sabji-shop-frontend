@@ -143,6 +143,7 @@ export function History({
   loading,
   collapsible = false,
   defaultCollapsed = false,
+  hideTypeFilter = false,
   showSummary = false,
   showBuySummary = false,
   showSellSummary = false
@@ -223,13 +224,15 @@ export function History({
               </option>
             ))}
           </SelectField>
-          <SelectField label="Type" value={filters.type} onChange={(value) => setField("type", value)}>
-            <option value="">All types</option>
-            <option value="IN">IN</option>
-            <option value="OUT">OUT</option>
-            <option value="ADJUSTMENT_IN">ADJUSTMENT IN</option>
-            <option value="ADJUSTMENT_OUT">ADJUSTMENT OUT</option>
-          </SelectField>
+          {!hideTypeFilter && (
+            <SelectField label="Type" value={filters.type} onChange={(value) => setField("type", value)}>
+              <option value="">All types</option>
+              <option value="IN">IN</option>
+              <option value="OUT">OUT</option>
+              <option value="ADJUSTMENT_IN">ADJUSTMENT IN</option>
+              <option value="ADJUSTMENT_OUT">ADJUSTMENT OUT</option>
+            </SelectField>
+          )}
           <InputField label="From" type="date" value={filters.from} onChange={(value) => setField("from", value)} />
           <InputField label="To" type="date" value={filters.to} onChange={(value) => setField("to", value)} />
           <button className="primary-button search-button" type="submit" disabled={loading}>

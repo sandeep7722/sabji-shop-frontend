@@ -17,7 +17,7 @@ export const tabs = [
   { id: "in", label: "Buy", icon: ArrowDownToLine },
   { id: "out", label: "Sell", icon: ArrowUpFromLine },
   { id: "history", label: "History", icon: ClipboardList },
-  { id: "sourceReport", label: "Dealer Buy-Sell Report", icon: Route },
+  { id: "sourceReport", label: "Dealer's Product Sell Report", icon: Route },
   { id: "customerReport", label: "Customer Sell Report", icon: ShoppingBag },
   { id: "parties", label: "Dealer/Customer", icon: Users },
   { id: "payments", label: "Payments", icon: ReceiptIndianRupee },
