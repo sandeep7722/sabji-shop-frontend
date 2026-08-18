@@ -542,6 +542,55 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(17, 107, 94, 0.14);
 }
 
+.searchable-select {
+  position: relative;
+}
+
+.searchable-select.disabled {
+  opacity: 0.72;
+}
+
+.searchable-options {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 230px;
+  overflow-y: auto;
+  display: grid;
+  gap: 2px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: var(--shadow);
+}
+
+.searchable-option {
+  min-height: 34px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  padding: 7px 9px;
+  text-align: left;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.searchable-option:hover,
+.searchable-option.selected {
+  background: var(--panel-muted);
+}
+
+.searchable-empty {
+  padding: 9px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 textarea {
   min-height: 90px;
   resize: vertical;

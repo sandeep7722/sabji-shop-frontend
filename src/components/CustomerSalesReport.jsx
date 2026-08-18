@@ -1,16 +1,15 @@
 import React, { useMemo, useState } from "react";
 import { CalendarSearch, ChevronDown, ChevronUp, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { formatDate, formatMoney } from "../utils/format.js";
-import { InputField } from "./FormFields.jsx";
+import { InputField, SearchableSelect } from "./FormFields.jsx";
 
 export function CustomerSalesReport({ parties, report, filters, setFilters, onSearch, onReset, loading }) {
-  const [customerSearch, setCustomerSearch] = useState("");
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const [isTableOpen, setIsTableOpen] = useState(false);
 
   const customerOptions = useMemo(() => {
     return parties.map((party) => ({
-      id: party._id,
+      value: party._id,
       label: `${party.partyCode} - ${party.name}${party.phone ? ` (${party.phone})` : ""}`
     }));
   }, [parties]);
@@ -19,14 +18,7 @@ export function CustomerSalesReport({ parties, report, filters, setFilters, onSe
     setFilters((current) => ({ ...current, [field]: value }));
   }
 
-  function setCustomer(value) {
-    setCustomerSearch(value);
-    const selectedCustomer = customerOptions.find((option) => option.label === value);
-    setField("customerId", selectedCustomer ? selectedCustomer.id : "");
-  }
-
   function resetFilters() {
-    setCustomerSearch("");
     setIsSummaryOpen(false);
     setIsTableOpen(false);
     onReset();
@@ -45,15 +37,7 @@ export function CustomerSalesReport({ parties, report, filters, setFilters, onSe
   return (
     <section className="content-section">
       <form className="customer-report-filters" onSubmit={submitFilters}>
-        <label className="field">
-          <span>Customer</span>
-          <input list="customer-options" value={customerSearch} placeholder="Search or select customer" onChange={(event) => setCustomer(event.target.value)} />
-          <datalist id="customer-options">
-            {customerOptions.map((option) => (
-              <option key={option.id} value={option.label} />
-            ))}
-          </datalist>
-        </label>
+        <SearchableSelect label="Customer" value={filters.customerId} options={customerOptions} emptyLabel="All customers" placeholder="Search customer" onChange={(value) => setField("customerId", value)} />
         <InputField label="From" type="date" value={filters.from} onChange={(value) => setField("from", value)} />
         <InputField label="To" type="date" value={filters.to} onChange={(value) => setField("to", value)} />
         <button className="primary-button search-button" type="submit" disabled={loading}>

@@ -67,7 +67,9 @@ export default function App() {
       salePackets: 0,
       saleWeight: 0,
       saleAmount: 0,
-      receivedAmount: 0
+      receivedAmount: 0,
+      remainingPackets: 0,
+      remainingWeight: 0
     },
     rows: []
   });

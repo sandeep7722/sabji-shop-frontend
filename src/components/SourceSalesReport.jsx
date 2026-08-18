@@ -1,24 +1,19 @@
 import React from "react";
 import { CalendarSearch, RotateCcw } from "lucide-react";
 import { formatDate, formatMoney } from "../utils/format.js";
-import { InputField, SelectField } from "./FormFields.jsx";
+import { InputField, SearchableSelect } from "./FormFields.jsx";
 
 export function SourceSalesReport({ parties, report, filters, setFilters, onSearch, onReset, loading }) {
   function setField(field, value) {
     setFilters((current) => ({ ...current, [field]: value }));
   }
 
+  const partyOptions = parties.map((party) => ({ value: party._id, label: `${party.partyCode} - ${party.name}` }));
+
   return (
     <section className="content-section">
       <form className="source-report-filters" onSubmit={onSearch}>
-        <SelectField label="Bought From Party" value={filters.sourcePartyId} onChange={(value) => setField("sourcePartyId", value)}>
-          <option value="">All source parties</option>
-          {parties.map((party) => (
-            <option key={party._id} value={party._id}>
-              {party.partyCode} - {party.name}
-            </option>
-          ))}
-        </SelectField>
+        <SearchableSelect label="Bought From Party" value={filters.sourcePartyId} options={partyOptions} emptyLabel="All source parties" placeholder="Search dealer" onChange={(value) => setField("sourcePartyId", value)} />
         <InputField label="From" type="date" value={filters.from} onChange={(value) => setField("from", value)} />
         <InputField label="To" type="date" value={filters.to} onChange={(value) => setField("to", value)} />
         <button className="primary-button search-button" type="submit" disabled={loading}>
@@ -43,6 +38,14 @@ export function SourceSalesReport({ parties, report, filters, setFilters, onSear
         <div className="metric">
           <span>Total Buy Amount</span>
           <strong>{formatMoney(report.totals.buyAmount)}</strong>
+        </div>
+        <div className="metric">
+          <span>Remaining Packets</span>
+          <strong className={(report.totals.remainingPackets || 0) < 0 ? "negative" : "positive"}>{report.totals.remainingPackets || 0}</strong>
+        </div>
+        <div className="metric">
+          <span>Remaining KG</span>
+          <strong className={(report.totals.remainingWeight || 0) < 0 ? "negative" : "positive"}>{report.totals.remainingWeight || 0} KG</strong>
         </div>
         <div className="metric">
           <span>Paid To Party</span>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { CalendarSearch, ChevronDown, ChevronUp, Plus, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { formatDate, formatMoney } from "../utils/format.js";
-import { InputField, SelectField } from "./FormFields.jsx";
+import { InputField, SearchableSelect, SelectField } from "./FormFields.jsx";
 import { SubmitButton } from "./SubmitButton.jsx";
 
 export function Payments({
@@ -30,6 +30,8 @@ export function Payments({
     setFilters((current) => ({ ...current, [field]: value }));
   }
 
+  const partyOptions = parties.map((party) => ({ value: party._id, label: `${party.partyCode} - ${party.name}` }));
+
   return (
     <section className="content-section">
       <button className="filter-toggle" type="button" onClick={() => setIsAddPaymentOpen((current) => !current)}>
@@ -42,14 +44,7 @@ export function Payments({
 
       {isAddPaymentOpen && (
         <form className="form-grid payment-add-form" onSubmit={onCreatePayment}>
-          <SelectField label="Party / Customer" value={paymentForm.partyId} required onChange={(value) => setPaymentField("partyId", value)}>
-            <option value="">Select party</option>
-            {parties.map((party) => (
-              <option key={party._id} value={party._id}>
-                {party.partyCode} - {party.name}
-              </option>
-            ))}
-          </SelectField>
+          <SearchableSelect label="Party / Customer" value={paymentForm.partyId} options={partyOptions} required emptyLabel="Select party" placeholder="Search party" onChange={(value) => setPaymentField("partyId", value)} />
           <SelectField label="Type" value={paymentForm.type} required onChange={(value) => setPaymentField("type", value)}>
             <option value="RECEIVED">Received</option>
             <option value="PAID">Paid</option>
@@ -89,14 +84,7 @@ export function Payments({
 
       {isFilterOpen && (
         <form className="payment-search-form" onSubmit={onSearchPayments}>
-          <SelectField label="Party" value={filters.partyId} onChange={(value) => setFilterField("partyId", value)}>
-            <option value="">All parties</option>
-            {parties.map((party) => (
-              <option key={party._id} value={party._id}>
-                {party.partyCode} - {party.name}
-              </option>
-            ))}
-          </SelectField>
+          <SearchableSelect label="Party" value={filters.partyId} options={partyOptions} emptyLabel="All parties" placeholder="Search party" onChange={(value) => setFilterField("partyId", value)} />
           <SelectField label="Type" value={filters.type} onChange={(value) => setFilterField("type", value)}>
             <option value="">All types</option>
             <option value="RECEIVED">Received</option>

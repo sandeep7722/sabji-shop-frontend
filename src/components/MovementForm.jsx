@@ -1,6 +1,6 @@
 import React from "react";
 import { RotateCcw } from "lucide-react";
-import { InputField, SelectField } from "./FormFields.jsx";
+import { InputField, SearchableSelect, SelectField } from "./FormFields.jsx";
 import { SubmitButton } from "./SubmitButton.jsx";
 
 export function MovementForm({
@@ -40,25 +40,18 @@ export function MovementForm({
   const dateField = <InputField label="Date" type="date" value={form.date} required onChange={(value) => setField("date", value)} />;
 
   const partyField = (
-    <SelectField label={partyLabel} value={form.partyId} onChange={(value) => setField("partyId", value)}>
-      <option value="">Select party</option>
-      {partyOptions.map((party) => (
-        <option key={party.value} value={party.value}>
-          {party.label}
-        </option>
-      ))}
-    </SelectField>
+    <SearchableSelect label={partyLabel} value={form.partyId} options={partyOptions} emptyLabel="Select party" placeholder="Search party" onChange={(value) => setField("partyId", value)} />
   );
 
   const sourcePartyField = sourcePartyLabel ? (
-    <SelectField label={sourcePartyLabel} value={form.sourcePartyId || ""} onChange={(value) => setField("sourcePartyId", value)}>
-      <option value="">Select source</option>
-      {partyOptions.map((party) => (
-        <option key={party.value} value={party.value}>
-          {party.label}
-        </option>
-      ))}
-    </SelectField>
+    <SearchableSelect
+      label={sourcePartyLabel}
+      value={form.sourcePartyId || ""}
+      options={partyOptions}
+      emptyLabel="Select source"
+      placeholder="Search source party"
+      onChange={(value) => setField("sourcePartyId", value)}
+    />
   ) : null;
 
   return (

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { CalendarSearch, ChevronDown, ChevronUp, Pencil, RotateCcw, SlidersHorizontal, X } from "lucide-react";
 import { formatApiError, formatDate, formatMoney, signedClass } from "../utils/format.js";
-import { InputField, SelectField } from "./FormFields.jsx";
+import { InputField, SearchableSelect, SelectField } from "./FormFields.jsx";
 import { SubmitButton } from "./SubmitButton.jsx";
 
 function dateInputValue(value) {
@@ -75,6 +75,12 @@ function calculateHistorySummary(history) {
         result.sellEntries += 1;
         result.receivedAmount += paymentAmount;
         if (partyBalance) partyBalance.balance += amount - paymentAmount;
+
+        if (movement.sourcePartyId) {
+          result.sourceSalePackets += movement.packets || 0;
+          result.sourceSaleWeight += movement.weight || 0;
+          result.sourceSaleAmount += amount;
+        }
       }
 
       if (movement.type === "PAYMENT_PAID") {
@@ -107,6 +113,11 @@ function calculateHistorySummary(history) {
       buyWeight: 0,
       sellPackets: 0,
       sellWeight: 0,
+      sourceSalePackets: 0,
+      sourceSaleWeight: 0,
+      sourceSaleAmount: 0,
+      remainingPackets: 0,
+      remainingWeight: 0,
       buyEntries: 0,
       sellEntries: 0,
       paidPaymentEntries: 0,
@@ -123,6 +134,8 @@ function calculateHistorySummary(history) {
     (total, party) => total + (party.balance > 0 ? party.balance : 0),
     0
   );
+  summary.remainingPackets = summary.buyPackets - summary.sourceSalePackets;
+  summary.remainingWeight = summary.buyWeight - summary.sourceSaleWeight;
   summary.suggestions = Array.from(summary.partyBalances.values())
     .filter((party) => party.balance !== 0)
     .sort((first, second) => Math.abs(second.balance) - Math.abs(first.balance))
@@ -193,6 +206,7 @@ export function History({
   }
 
   const historySummary = calculateHistorySummary(history);
+  const partyOptions = parties.map((party) => ({ value: party._id, label: `${party.partyCode} - ${party.name}` }));
 
   return (
     <section className="content-section">
@@ -208,14 +222,7 @@ export function History({
 
       {(!collapsible || !isCollapsed) && (
         <form className="filters" onSubmit={onSubmit}>
-          <SelectField label="Party" value={filters.partyId} onChange={(value) => setField("partyId", value)}>
-            <option value="">All parties</option>
-            {parties.map((party) => (
-              <option key={party._id} value={party._id}>
-                {party.partyCode} - {party.name}
-              </option>
-            ))}
-          </SelectField>
+          <SearchableSelect label="Party" value={filters.partyId} options={partyOptions} emptyLabel="All parties" placeholder="Search party" onChange={(value) => setField("partyId", value)} />
           <SelectField label="Product" value={filters.productId} onChange={(value) => setField("productId", value)}>
             <option value="">All products</option>
             {products.map((product) => (
@@ -354,6 +361,18 @@ export function History({
                 <span>Sell Packets / KG</span>
                 <strong>{historySummary.sellPackets} / {historySummary.sellWeight} KG</strong>
               </div>
+              <div className="metric">
+                <span>Dealer Sold Packets / KG</span>
+                <strong>{historySummary.sourceSalePackets} / {historySummary.sourceSaleWeight} KG</strong>
+              </div>
+              <div className="metric">
+                <span>Dealer Remaining Packets</span>
+                <strong className={historySummary.remainingPackets < 0 ? "negative" : "positive"}>{historySummary.remainingPackets}</strong>
+              </div>
+              <div className="metric">
+                <span>Dealer Remaining KG</span>
+                <strong className={historySummary.remainingWeight < 0 ? "negative" : "positive"}>{historySummary.remainingWeight} KG</strong>
+              </div>
               <div className="history-suggestions">
                 <strong>Suggestions</strong>
                 {historySummary.suggestions.length ? (
@@ -410,22 +429,16 @@ export function History({
                         <option value="ADJUSTMENT_IN">ADJUSTMENT IN</option>
                         <option value="ADJUSTMENT_OUT">ADJUSTMENT OUT</option>
                       </SelectField>
-                      <SelectField label="Party" value={editForm.partyId} onChange={(value) => setEditField("partyId", value)}>
-                        <option value="">No party</option>
-                        {parties.map((party) => (
-                          <option key={party._id} value={party._id}>
-                            {party.partyCode} - {party.name}
-                          </option>
-                        ))}
-                      </SelectField>
-                      <SelectField label="Bought From" value={editForm.sourcePartyId} disabled={editForm.type !== "OUT"} onChange={(value) => setEditField("sourcePartyId", value)}>
-                        <option value="">No source</option>
-                        {parties.map((party) => (
-                          <option key={party._id} value={party._id}>
-                            {party.partyCode} - {party.name}
-                          </option>
-                        ))}
-                      </SelectField>
+                      <SearchableSelect label="Party" value={editForm.partyId} options={partyOptions} emptyLabel="No party" placeholder="Search party" onChange={(value) => setEditField("partyId", value)} />
+                      <SearchableSelect
+                        label="Bought From"
+                        value={editForm.sourcePartyId}
+                        options={partyOptions}
+                        emptyLabel="No source"
+                        placeholder="Search source"
+                        disabled={editForm.type !== "OUT"}
+                        onChange={(value) => setEditField("sourcePartyId", value)}
+                      />
                       <InputField label="Date" type="date" value={editForm.date} required onChange={(value) => setEditField("date", value)} />
                       <InputField label="Packets" type="number" min="0" step="1" value={editForm.packets} required onChange={(value) => setEditField("packets", value)} />
                       <InputField label="Weight" type="number" min="0" step="0.01" value={editForm.weight} required onChange={(value) => setEditField("weight", value)} />
