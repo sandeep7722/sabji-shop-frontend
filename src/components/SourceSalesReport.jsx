@@ -113,6 +113,8 @@ export function SourceSalesReport({ parties, report, filters, setFilters, onSear
                 <th>Product</th>
                 <th>Packets</th>
                 <th>Weight</th>
+                <th>Rate / KG</th>
+                <th>Other Expense</th>
                 <th>Amount</th>
                 <th>Received</th>
                 <th>Note</th>
@@ -127,6 +129,8 @@ export function SourceSalesReport({ parties, report, filters, setFilters, onSear
                   <td>{movement.productId?.name || "-"}</td>
                   <td>{movement.packets}</td>
                   <td>{movement.weight} KG</td>
+                  <td>{movement.ratePerKg ? formatMoney(movement.ratePerKg) : "-"}</td>
+                  <td>{movement.otherExpense ? formatMoney(movement.otherExpense) : "-"}</td>
                   <td>{formatMoney(movement.totalAmount)}</td>
                   <td className="positive">{movement.paymentAmount ? formatMoney(movement.paymentAmount) : "-"}</td>
                   <td>{movement.note || "-"}</td>
@@ -134,7 +138,7 @@ export function SourceSalesReport({ parties, report, filters, setFilters, onSear
               ))}
               {!report.rows.length && (
                 <tr>
-                  <td colSpan="9">{loading ? "Loading report..." : "No source-party sales found."}</td>
+                  <td colSpan="11">{loading ? "Loading report..." : "No source-party sales found."}</td>
                 </tr>
               )}
             </tbody>

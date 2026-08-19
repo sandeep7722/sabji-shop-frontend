@@ -102,6 +102,8 @@ export function CustomerSalesReport({ parties, report, filters, setFilters, onSe
                 <th>Product</th>
                 <th>Packets</th>
                 <th>Weight</th>
+                <th>Rate / KG</th>
+                <th>Other Expense</th>
                 <th>Amount</th>
                 <th>Paid</th>
                 <th>Remaining Amount</th>
@@ -121,6 +123,8 @@ export function CustomerSalesReport({ parties, report, filters, setFilters, onSe
                     <td>{paymentOnly ? "Manual Payment" : movement.productId?.name || "-"}</td>
                     <td>{paymentOnly ? "-" : movement.packets}</td>
                     <td>{paymentOnly ? "-" : `${movement.weight} KG`}</td>
+                    <td>{paymentOnly || !movement.ratePerKg ? "-" : formatMoney(movement.ratePerKg)}</td>
+                    <td>{paymentOnly || !movement.otherExpense ? "-" : formatMoney(movement.otherExpense)}</td>
                     <td>{paymentOnly ? "-" : formatMoney(movement.totalAmount)}</td>
                     <td className="positive">{movement.paymentAmount ? formatMoney(movement.paymentAmount) : "-"}</td>
                     <td className={rowBalance > 0 ? "negative" : "positive"}>{paymentOnly ? "-" : formatMoney(rowBalance)}</td>
@@ -130,7 +134,7 @@ export function CustomerSalesReport({ parties, report, filters, setFilters, onSe
               })}
               {!report.rows.length && (
                 <tr>
-                  <td colSpan="10">{loading ? "Loading report..." : "No customer sales found."}</td>
+                  <td colSpan="12">{loading ? "Loading report..." : "No customer sales found."}</td>
                 </tr>
               )}
             </tbody>
