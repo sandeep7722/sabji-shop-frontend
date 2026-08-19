@@ -21,6 +21,7 @@ export const tabs = [
   { id: "customerReport", label: "Customer Sell Report", icon: ShoppingBag },
   { id: "parties", label: "Dealer/Customer", icon: Users },
   { id: "payments", label: "Payments", icon: ReceiptIndianRupee },
+  { id: "collection", label: "Collection", icon: ReceiptIndianRupee },
   { id: "adjustment", label: "Adjustment", icon: SlidersHorizontal },
   { id: "products", label: "Products", icon: PackagePlus }
 ];

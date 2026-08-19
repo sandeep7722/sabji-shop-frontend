@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { api } from "./api/client.js";
 import { AdjustmentForm } from "./components/AdjustmentForm.jsx";
 import { Alerts } from "./components/Alerts.jsx";
+import { Collection } from "./components/Collection.jsx";
 import { CustomerSalesReport } from "./components/CustomerSalesReport.jsx";
 import { CurrentStock } from "./components/CurrentStock.jsx";
 import { History } from "./components/History.jsx";
@@ -73,6 +74,7 @@ export default function App() {
   const [currentStock, setCurrentStock] = useState([]);
   const [history, setHistory] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [collectionRows, setCollectionRows] = useState([]);
   const [sourceSalesReport, setSourceSalesReport] = useState({
     totals: {
       buyPackets: 0,
@@ -200,6 +202,11 @@ export default function App() {
     setPayments(data);
   }
 
+  async function loadCollection() {
+    const data = await api("/payments/collection");
+    setCollectionRows(data);
+  }
+
   async function loadSourceSalesReport(filters = sourceSalesFilters) {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
@@ -224,7 +231,7 @@ export default function App() {
     setLoading(true);
     setError("");
     try {
-      await Promise.all([loadProducts(), loadParties(), loadCurrentStock(), loadHistory(), loadPayments(), loadSourceSalesReport(), loadCustomerSalesReport()]);
+      await Promise.all([loadProducts(), loadParties(), loadCurrentStock(), loadHistory(), loadPayments(), loadCollection(), loadSourceSalesReport(), loadCustomerSalesReport()]);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -262,6 +269,7 @@ export default function App() {
         loadCurrentStock(),
         loadHistory(),
         loadPayments(),
+        loadCollection(),
         loadSourceSalesReport(),
         loadCustomerSalesReport(),
         selectedPartyId ? loadPartyDetails() : Promise.resolve()
@@ -391,6 +399,7 @@ export default function App() {
         loadParties(),
         loadHistory(),
         loadPayments(),
+        loadCollection(),
         loadSourceSalesReport(),
         loadCustomerSalesReport(),
         selectedPartyId === partyId ? loadPartyDetails() : Promise.resolve()
@@ -444,6 +453,7 @@ export default function App() {
       await Promise.all([
         loadPayments(),
         loadHistory(),
+        loadCollection(),
         loadSourceSalesReport(),
         loadCustomerSalesReport(),
         selectedPartyId ? loadPartyDetails() : Promise.resolve()
@@ -599,6 +609,7 @@ export default function App() {
         loadCurrentStock(),
         loadHistory(),
         loadPayments(),
+        loadCollection(),
         loadSourceSalesReport(),
         loadCustomerSalesReport(),
         selectedPartyId ? loadPartyDetails() : Promise.resolve()
@@ -816,6 +827,7 @@ export default function App() {
             submitError={submitErrors.payment}
           />
         )}
+        {activeTab === "collection" && <Collection rows={collectionRows} loading={loading} />}
         {activeTab === "adjustment" && (
           <AdjustmentForm
             form={adjustmentForm}
