@@ -311,25 +311,25 @@ textarea {
 
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 14px;
   min-width: 0;
 }
 
 .metric-grid.four-metrics {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
 }
 
 .metric-grid.source-report-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
 }
 
 .metric-grid.customer-report-grid {
-  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
 }
 
 .metric-grid.history-summary-grid {
-  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
 }
 
 .history-suggestions {
@@ -379,9 +379,14 @@ textarea {
 .metric strong {
   display: block;
   margin-top: 8px;
-  font-size: 30px;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  font-size: 26px;
   line-height: 1.12;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  scrollbar-width: thin;
+  white-space: nowrap;
 }
 
 .table-wrap {
@@ -399,7 +404,7 @@ textarea {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 680px;
+  min-width: 900px;
 }
 
 th,
@@ -969,7 +974,7 @@ textarea {
   .metric-grid,
   .metric-grid.four-metrics,
   .metric-grid.source-report-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(230px, 1fr));
   }
 
   .source-report-filters,
@@ -1135,7 +1140,7 @@ textarea {
   }
 
   table {
-    min-width: 760px;
+    min-width: 900px;
   }
 
   th,

@@ -22,8 +22,27 @@ export function MovementForm({
   partyFirst = false,
   compact = false
 }) {
+  function calculateTotal(nextForm) {
+    if (nextForm.ratePerKg === "" || nextForm.ratePerKg === undefined || nextForm.ratePerKg === null) {
+      return nextForm.totalAmount;
+    }
+
+    const weight = Number(nextForm.weight || 0);
+    const ratePerKg = Number(nextForm.ratePerKg || 0);
+    const otherExpense = Number(nextForm.otherExpense || 0);
+    const total = weight * ratePerKg + otherExpense;
+
+    return Number.isFinite(total) ? total.toFixed(2) : "";
+  }
+
   function setField(field, value) {
-    setForm((current) => ({ ...current, [field]: value }));
+    setForm((current) => {
+      const nextForm = { ...current, [field]: value };
+      if (["weight", "ratePerKg", "otherExpense"].includes(field)) {
+        nextForm.totalAmount = calculateTotal(nextForm);
+      }
+      return nextForm;
+    });
   }
 
   const productField = (
@@ -76,12 +95,31 @@ export function MovementForm({
         </div>
         <div className={compact ? "compact-form-row compact-form-row-money" : "two-column"}>
           <InputField
+            label="Rate / KG"
+            type="number"
+            min="0"
+            step="0.01"
+            value={form.ratePerKg}
+            placeholder="0"
+            onChange={(value) => setField("ratePerKg", value)}
+          />
+          <InputField
+            label="Other Expense"
+            type="number"
+            min="0"
+            step="0.01"
+            value={form.otherExpense}
+            placeholder="Optional"
+            onChange={(value) => setField("otherExpense", value)}
+          />
+          <InputField
             label="Total Amount"
             type="number"
             min="0"
             step="0.01"
             value={form.totalAmount}
             placeholder="0"
+            readOnly={Boolean(form.ratePerKg)}
             onChange={(value) => setField("totalAmount", value)}
           />
           <InputField

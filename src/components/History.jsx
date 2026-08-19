@@ -18,6 +18,8 @@ function createEditForm(movement) {
     date: dateInputValue(movement.date),
     packets: String(movement.packets ?? ""),
     weight: String(movement.weight ?? ""),
+    ratePerKg: movement.ratePerKg ? String(movement.ratePerKg) : "",
+    otherExpense: movement.otherExpense ? String(movement.otherExpense) : "",
     totalAmount: String(movement.totalAmount ?? ""),
     paymentAmount: movement.paymentAmount ? String(movement.paymentAmount) : "",
     paymentMode: movement.paymentMode || "Cash",
@@ -172,8 +174,27 @@ export function History({
     setFilters((current) => ({ ...current, [field]: value }));
   }
 
+  function calculateEditTotal(nextForm) {
+    if (nextForm.ratePerKg === "" || nextForm.ratePerKg === undefined || nextForm.ratePerKg === null) {
+      return nextForm.totalAmount;
+    }
+
+    const weight = Number(nextForm.weight || 0);
+    const ratePerKg = Number(nextForm.ratePerKg || 0);
+    const otherExpense = Number(nextForm.otherExpense || 0);
+    const total = weight * ratePerKg + otherExpense;
+
+    return Number.isFinite(total) ? total.toFixed(2) : "";
+  }
+
   function setEditField(field, value) {
-    setEditForm((current) => ({ ...current, [field]: value }));
+    setEditForm((current) => {
+      const nextForm = { ...current, [field]: value };
+      if (["weight", "ratePerKg", "otherExpense"].includes(field)) {
+        nextForm.totalAmount = calculateEditTotal(nextForm);
+      }
+      return nextForm;
+    });
   }
 
   function startEdit(movement) {
@@ -403,6 +424,8 @@ export function History({
               <th>Bought From</th>
               <th>Packets</th>
               <th>Weight</th>
+              <th>Rate / KG</th>
+              <th>Other Expense</th>
               <th>Total Amount</th>
               <th>Paid / Received</th>
               <th>Note</th>
@@ -413,7 +436,7 @@ export function History({
             {history.map((movement) =>
               editingId === movement._id && editForm ? (
                 <tr className={movement.isEdited ? "edited-row" : ""} key={movement._id}>
-                  <td colSpan="11">
+                  <td colSpan="13">
                     <form className="history-edit-form" onSubmit={(event) => submitEdit(event, movement._id)}>
                       <SelectField label="Product" value={editForm.productId} required onChange={(value) => setEditField("productId", value)}>
                         <option value="">Select product</option>
@@ -442,7 +465,9 @@ export function History({
                       <InputField label="Date" type="date" value={editForm.date} required onChange={(value) => setEditField("date", value)} />
                       <InputField label="Packets" type="number" min="0" step="1" value={editForm.packets} required onChange={(value) => setEditField("packets", value)} />
                       <InputField label="Weight" type="number" min="0" step="0.01" value={editForm.weight} required onChange={(value) => setEditField("weight", value)} />
-                      <InputField label="Total Amount" type="number" min="0" step="0.01" value={editForm.totalAmount} onChange={(value) => setEditField("totalAmount", value)} />
+                      <InputField label="Rate / KG" type="number" min="0" step="0.01" value={editForm.ratePerKg} onChange={(value) => setEditField("ratePerKg", value)} />
+                      <InputField label="Other Expense" type="number" min="0" step="0.01" value={editForm.otherExpense} onChange={(value) => setEditField("otherExpense", value)} />
+                      <InputField label="Total Amount" type="number" min="0" step="0.01" value={editForm.totalAmount} readOnly={Boolean(editForm.ratePerKg)} onChange={(value) => setEditField("totalAmount", value)} />
                       <InputField
                         label="Paid / Received"
                         type="number"
@@ -483,6 +508,8 @@ export function History({
                   <td>{movement.sourcePartyId ? `${movement.sourcePartyId.partyCode} - ${movement.sourcePartyId.name}` : "-"}</td>
                   <td className={isPaymentOnly(movement) ? "" : signedClass(movement.signedPackets)}>{isPaymentOnly(movement) ? "-" : movement.signedPackets}</td>
                   <td className={isPaymentOnly(movement) ? "" : signedClass(movement.signedWeight)}>{isPaymentOnly(movement) ? "-" : `${movement.signedWeight} KG`}</td>
+                  <td>{isPaymentOnly(movement) || !movement.ratePerKg ? "-" : formatMoney(movement.ratePerKg)}</td>
+                  <td>{isPaymentOnly(movement) || !movement.otherExpense ? "-" : formatMoney(movement.otherExpense)}</td>
                   <td>{isPaymentOnly(movement) ? "-" : formatMoney(movement.totalAmount)}</td>
                   <td className={movement.paymentType === "RECEIVED" ? "positive" : movement.paymentType === "PAID" ? "negative" : ""}>
                     {movement.paymentAmount ? `${movement.paymentType} ${formatMoney(movement.paymentAmount)}` : "-"}
@@ -502,7 +529,7 @@ export function History({
             )}
             {!history.length && (
               <tr>
-                <td colSpan="11">{loading ? "Loading history..." : "No movements found."}</td>
+                <td colSpan="13">{loading ? "Loading history..." : "No movements found."}</td>
               </tr>
             )}
           </tbody>

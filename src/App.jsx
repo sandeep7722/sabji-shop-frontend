@@ -22,11 +22,26 @@ const emptyMovementForm = {
   partyName: "",
   packets: "",
   weight: "",
+  ratePerKg: "",
+  otherExpense: "",
   totalAmount: "",
   paymentAmount: "",
   paymentMode: "Cash",
   note: ""
 };
+
+function movementPayload(form, extra = {}) {
+  return {
+    ...form,
+    ...extra,
+    packets: Number(form.packets),
+    weight: Number(form.weight),
+    ratePerKg: form.ratePerKg === "" ? undefined : Number(form.ratePerKg),
+    otherExpense: form.otherExpense === "" ? 0 : Number(form.otherExpense),
+    totalAmount: Number(form.totalAmount || 0),
+    paymentMode: form.paymentMode
+  };
+}
 
 const emptyAdjustmentForm = {
   productId: "",
@@ -236,15 +251,10 @@ export default function App() {
     try {
       await api(`/stock/${kind}`, {
         method: "POST",
-        body: JSON.stringify({
-          ...form,
-          packets: Number(form.packets),
-          weight: Number(form.weight),
-          totalAmount: Number(form.totalAmount || 0),
+        body: JSON.stringify(movementPayload(form, {
           paymentAmount: Number(form.paymentAmount || 0),
-          paymentMode: form.paymentMode,
           sourcePartyId: form.sourcePartyId
-        })
+        }))
       });
       if (kind === "in") setStockInForm(emptyMovementForm);
       if (kind === "out") setStockOutForm(emptyMovementForm);
@@ -580,14 +590,9 @@ export default function App() {
     try {
       await api(`/stock/history/${movementId}`, {
         method: "PATCH",
-        body: JSON.stringify({
-          ...form,
-          packets: Number(form.packets),
-          weight: Number(form.weight),
-          totalAmount: Number(form.totalAmount || 0),
-          paymentAmount: isStockTrade ? Number(form.paymentAmount || 0) : 0,
-          paymentMode: form.paymentMode
-        })
+        body: JSON.stringify(movementPayload(form, {
+          paymentAmount: isStockTrade ? Number(form.paymentAmount || 0) : 0
+        }))
       });
 
       await Promise.all([
